@@ -1,10 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { PrismaClient } from '@prisma/client'
 
-const prisma = new PrismaClient()
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined
+}
+
+const prisma = globalForPrisma.prisma ?? new PrismaClient()
+
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
 
 export async function GET() {
   try {
+    // Verificar se o Prisma Client está funcionando
+    await prisma.$connect()
+    
     const doacoes = await prisma.doacao.findMany({
       orderBy: {
         data: 'desc'
@@ -14,15 +23,29 @@ export async function GET() {
     return NextResponse.json(doacoes)
   } catch (error) {
     console.error('Erro ao buscar doações:', error)
+    
+    // Se for erro de conexão com banco, retornar erro específico
+    if (error instanceof Error && error.message.includes('Prisma')) {
+      return NextResponse.json(
+        { error: 'Erro de conexão com banco de dados' },
+        { status: 503 }
+      )
+    }
+    
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }
     )
+  } finally {
+    await prisma.$disconnect()
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
+    // Verificar se o Prisma Client está funcionando
+    await prisma.$connect()
+    
     const body = await request.json()
     const { valor, observacao, data } = body
 
@@ -44,9 +67,20 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(doacao, { status: 201 })
   } catch (error) {
     console.error('Erro ao criar doação:', error)
+    
+    // Se for erro de conexão com banco, retornar erro específico
+    if (error instanceof Error && error.message.includes('Prisma')) {
+      return NextResponse.json(
+        { error: 'Erro de conexão com banco de dados' },
+        { status: 503 }
+      )
+    }
+    
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }
     )
+  } finally {
+    await prisma.$disconnect()
   }
 }
