@@ -249,7 +249,7 @@ export default function AdminPage() {
                 <p className="text-gray-400 text-sm mt-2">Use o formulário ao lado para começar</p>
               </div>
             ) : (
-              diasOrdenados.map((dia, index) => {
+              diasOrdenados.map((dia) => {
                 const doacoesDia = grupos[dia]
                 const totalDia = doacoesDia.reduce((sum, d) => sum + d.valor, 0)
                 const data = new Date(dia)

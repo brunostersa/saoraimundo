@@ -123,7 +123,7 @@ export default function DoacoesClient() {
               <p className="text-blue-500 text-xs mt-1">As doações aparecerão aqui</p>
             </div>
           ) : (
-            doacoes.slice(0, 7).map((doacao, index) => {
+            doacoes.slice(0, 7).map((doacao) => {
               const data = new Date(doacao.data)
               const isToday = data.toDateString() === new Date().toDateString()
               
