@@ -106,31 +106,28 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen p-4 md:p-6 lg:p-8">
       {/* Header - Reduzido e mais compacto */}
-      <div className="text-center mb-6 lg:mb-8">
-        <div className="mb-4">
+      <div className="text-center mb-4">
+        <div className="mb-2">
           <Image
             src="/logo.png"
             alt="Logo Igreja São Raimundo"
             width={200}
             height={100}
-            className="mx-auto w-20 h-10 sm:w-24 sm:h-12 md:w-28 md:h-14 object-contain drop-shadow-lg"
+            className="mx-auto w-16 h-8 sm:w-20 sm:h-10 object-contain drop-shadow-lg"
             priority
           />
         </div>
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 mb-2 drop-shadow-lg">
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-800 mb-1">
           Painel Administrativo
         </h1>
-        <p className="text-sm sm:text-base md:text-lg text-gray-700 mb-3 drop-shadow-md">
-          Igreja São Raimundo - Sistema de Doações
-        </p>
-        <div className="text-gray-700 text-xs sm:text-sm mb-3 bg-white/80 backdrop-blur-sm rounded-xl px-4 py-2 border border-igreja-dourado/30 shadow-lg max-w-xl mx-auto">
+        <div className="text-gray-700 text-xs mb-2 bg-white/80 backdrop-blur-sm rounded-lg px-3 py-1 border border-igreja-dourado/30 shadow-sm max-w-md mx-auto">
           <span className="font-medium">Diocese de Araguaína</span>
           <span className="mx-2 text-gray-400">•</span>
           <span className="text-gray-600">@saoraimundononato_camposlindos</span>
         </div>
         <Link 
           href="/"
-          className="inline-flex items-center space-x-2 bg-igreja-dourado hover:bg-igreja-dourado/80 text-white px-4 py-2 rounded-xl font-semibold transition-all duration-300 text-sm shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+          className="inline-flex items-center space-x-2 bg-igreja-dourado hover:bg-igreja-dourado/80 text-white px-3 py-1.5 rounded-lg font-semibold transition-all duration-300 text-xs shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
         >
           <span>←</span>
           <span>Voltar para o Painel Público</span>
