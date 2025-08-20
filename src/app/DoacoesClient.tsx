@@ -106,114 +106,83 @@ export default function DoacoesClient() {
 
       {/* Histórico */}
       <div className="bg-gradient-to-br from-blue-50 via-indigo-100 to-purple-100 rounded-2xl p-6 border-2 border-blue-200 shadow-lg hover:shadow-xl transition-all duration-300">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-bold text-blue-800 uppercase tracking-wider">
-            Histórico Visual
+            Histórico de Doações
           </h3>
           <div className="text-sm text-blue-700 bg-blue-200 px-4 py-2 rounded-full font-bold shadow-md">
-            Últimos 7 dias
+            Últimos 10 registros
           </div>
         </div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-h-[500px] overflow-y-auto custom-scrollbar px-2">
+        <div className="space-y-3 max-h-80 overflow-y-auto custom-scrollbar">
           {doacoes.length === 0 ? (
-            <div className="col-span-1 sm:col-span-2 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-3xl p-8 text-center border-2 border-dashed border-blue-300 shadow-lg">
-              <div className="text-blue-400 text-6xl mb-4">📝</div>
-              <p className="text-blue-800 text-lg font-bold mb-2">Nenhuma doação registrada</p>
+            <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-2xl p-6 text-center border-2 border-dashed border-blue-300 shadow-lg">
+              <div className="text-blue-400 text-4xl mb-3">📝</div>
+              <p className="text-blue-800 text-base font-bold mb-1">Nenhuma doação registrada</p>
               <p className="text-blue-600 text-sm">As doações aparecerão aqui</p>
             </div>
           ) : (
-            doacoes.slice(0, 7).map((doacao) => {
+            doacoes.slice(0, 10).map((doacao) => {
               const data = new Date(doacao.data)
               const isToday = data.toDateString() === new Date().toDateString()
               const isYesterday = data.toDateString() === new Date(Date.now() - 24 * 60 * 60 * 1000).toDateString()
               
               return (
-                <div key={doacao.id} className={`relative overflow-hidden rounded-3xl p-6 shadow-2xl hover:shadow-3xl transition-all duration-500 transform hover:-translate-y-2 ${
-                  isToday ? 'bg-gradient-to-br from-green-100 via-green-50 to-emerald-100 border-2 border-green-200' : 
-                  isYesterday ? 'bg-gradient-to-br from-blue-100 via-blue-50 to-indigo-100 border-2 border-blue-200' : 
-                  'bg-gradient-to-br from-amber-100 via-yellow-50 to-orange-100 border-2 border-amber-200'
+                <div key={doacao.id} className={`flex items-center justify-between p-4 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 ${
+                  isToday ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-l-4 border-green-400' : 
+                  isYesterday ? 'bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-400' : 
+                  'bg-gradient-to-r from-amber-50 to-orange-50 border-l-4 border-amber-400'
                 }`}>
-                  {/* Background decorativo */}
-                  <div className={`absolute top-0 right-0 w-32 h-32 rounded-full opacity-10 ${
-                    isToday ? 'bg-green-400' : 
-                    isYesterday ? 'bg-blue-400' : 
-                    'bg-amber-400'
-                  }`}></div>
                   
-                  {/* Data - Grande e destacada com fundo */}
-                  <div className="text-center mb-4 relative z-10">
-                    <div className={`inline-block p-3 rounded-2xl ${
-                      isToday ? 'bg-green-200/50' : 
-                      isYesterday ? 'bg-blue-200/50' : 
-                      'bg-amber-200/50'
+                  {/* Data e Dia */}
+                  <div className="flex items-center space-x-4">
+                    <div className={`text-center min-w-[60px] ${
+                      isToday ? 'text-green-700' : 
+                      isYesterday ? 'text-blue-700' : 
+                      'text-amber-700'
                     }`}>
-                      <div className={`text-3xl md:text-4xl font-black ${
-                        isToday ? 'text-green-800' : 
-                        isYesterday ? 'text-blue-800' : 
-                        'text-amber-800'
-                      }`}>
+                      <div className="text-2xl font-bold">
                         {format(data, 'dd', { locale: ptBR })}
                       </div>
-                      <div className={`text-sm font-bold uppercase tracking-wider ${
-                        isToday ? 'text-green-700' : 
-                        isYesterday ? 'text-blue-700' : 
-                        'text-amber-700'
-                      }`}>
+                      <div className="text-xs font-medium uppercase">
                         {format(data, 'MMM', { locale: ptBR })}
                       </div>
-                      <div className={`text-xs font-medium ${
-                        isToday ? 'text-green-600' : 
-                        isYesterday ? 'text-blue-600' : 
-                        'text-amber-600'
-                      }`}>
-                        {format(data, 'yyyy', { locale: ptBR })}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* Valor - Destacado com fundo */}
-                  <div className="text-center mb-4 relative z-10">
-                    <div className={`inline-block p-4 rounded-2xl ${
-                      isToday ? 'bg-green-300/30' : 
-                      isYesterday ? 'bg-blue-300/30' : 
-                      'bg-amber-300/30'
-                    }`}>
-                      <div className={`text-2xl md:text-3xl font-black ${
-                        isToday ? 'text-green-900' : 
-                        isYesterday ? 'text-blue-900' : 
-                        'text-amber-900'
-                      }`}>
-                        {formatarValor(doacao.valor)}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* Indicadores e horário */}
-                  <div className="flex items-center justify-between relative z-10">
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-4 h-4 rounded-full shadow-lg ${
-                        isToday ? 'bg-green-500' : 
-                        isYesterday ? 'bg-blue-500' : 
-                        'bg-amber-500'
-                      }`}></div>
-                      {isToday && (
-                        <span className="text-xs bg-green-300 text-green-900 px-3 py-1.5 rounded-full font-bold shadow-md">
-                          HOJE
-                        </span>
-                      )}
-                      {isYesterday && (
-                        <span className="text-xs bg-blue-300 text-blue-900 px-3 py-1.5 rounded-full font-bold shadow-md">
-                          ONTEM
-                        </span>
-                      )}
                     </div>
                     
-                    {/* Horário de atualização */}
-                    <div className={`text-sm font-bold px-3 py-1.5 rounded-xl ${
-                      isToday ? 'bg-green-200 text-green-800' : 
-                      isYesterday ? 'bg-blue-200 text-blue-800' : 
-                      'bg-amber-200 text-amber-800'
+                    <div className="text-sm text-gray-600">
+                      {format(data, 'EEEE', { locale: ptBR })}
+                    </div>
+                  </div>
+                  
+                  {/* Valor */}
+                  <div className={`text-xl font-bold ${
+                    isToday ? 'text-green-700' : 
+                    isYesterday ? 'text-blue-700' : 
+                    'text-amber-700'
+                  }`}>
+                    {formatarValor(doacao.valor)}
+                  </div>
+                  
+                  {/* Status e Horário */}
+                  <div className="flex items-center space-x-3">
+                    {/* Badge de status */}
+                    {isToday && (
+                      <div className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                        HOJE
+                      </div>
+                    )}
+                    {isYesterday && (
+                      <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                        ONTEM
+                      </div>
+                    )}
+                    
+                    {/* Horário */}
+                    <div className={`text-xs px-2 py-1 rounded-lg ${
+                      isToday ? 'bg-green-100 text-green-700' : 
+                      isYesterday ? 'bg-blue-100 text-blue-700' : 
+                      'bg-amber-100 text-amber-700'
                     }`}>
                       {format(data, 'HH:mm', { locale: ptBR })}
                     </div>
