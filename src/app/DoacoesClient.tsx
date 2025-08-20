@@ -16,9 +16,18 @@ export default function DoacoesClient() {
   const [totalHoje, setTotalHoje] = useState(0)
   const [totalGeral, setTotalGeral] = useState(0)
   const [loading, setLoading] = useState(true)
+  const [lastUpdate, setLastUpdate] = useState<Date>(new Date())
 
   useEffect(() => {
     fetchDoacoes()
+    
+    // Auto-refresh a cada 30 segundos
+    const interval = setInterval(() => {
+      fetchDoacoes()
+    }, 30000) // 30 segundos
+    
+    // Cleanup do interval quando componente desmontar
+    return () => clearInterval(interval)
   }, [])
 
   const fetchDoacoes = async () => {
@@ -42,6 +51,7 @@ export default function DoacoesClient() {
       
       setTotalHoje(totalHojeValue)
       setTotalGeral(totalGeralValue)
+      setLastUpdate(new Date())
       setLoading(false)
     } catch (error) {
       console.error('Erro ao buscar doações:', error)
@@ -93,7 +103,9 @@ export default function DoacoesClient() {
         <div className="text-3xl font-bold text-green-700 mb-1">
           {formatarValor(totalHoje)}
         </div>
-        <div className="text-xs text-green-600">Atualizado em tempo real</div>
+        <div className="text-xs text-green-600">
+          Atualizado em tempo real • Última atualização: {lastUpdate.toLocaleTimeString('pt-BR')}
+        </div>
       </div>
       
       <div className="bg-gradient-to-br from-amber-50 via-orange-100 to-yellow-100 rounded-2xl p-4 text-center border-2 border-amber-200 shadow-lg hover:shadow-xl transition-all duration-300">
@@ -110,8 +122,14 @@ export default function DoacoesClient() {
           <h3 className="text-lg font-bold text-blue-800 uppercase tracking-wider">
             Histórico de Doações
           </h3>
-          <div className="text-sm text-blue-700 bg-blue-200 px-4 py-2 rounded-full font-bold shadow-md">
-            Últimos 10 registros
+          <div className="flex items-center space-x-3">
+            <div className="text-sm text-blue-700 bg-blue-200 px-4 py-2 rounded-full font-bold shadow-md">
+              Últimos 10 registros
+            </div>
+            <div className="flex items-center space-x-2 text-xs text-blue-600">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <span>Auto-refresh a cada 30s</span>
+            </div>
           </div>
         </div>
         
