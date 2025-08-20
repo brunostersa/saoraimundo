@@ -20,6 +20,8 @@ export default function AdminPage() {
   const [doacoes, setDoacoes] = useState<Doacao[]>([])
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
+  const [deletingId, setDeletingId] = useState<number | null>(null)
+  const [confirmDelete, setConfirmDelete] = useState<number | null>(null)
 
   useEffect(() => {
     fetchDoacoes()
@@ -32,6 +34,33 @@ export default function AdminPage() {
       setDoacoes(data)
     } catch (error) {
       console.error('Erro ao buscar doações:', error)
+    }
+  }
+
+  const handleDelete = async (id: number) => {
+    if (confirmDelete !== id) {
+      setConfirmDelete(id)
+      return
+    }
+
+    setDeletingId(id)
+    setConfirmDelete(null)
+
+    try {
+      const response = await fetch(`/api/doacoes/${id}`, {
+        method: 'DELETE',
+      })
+
+      if (response.ok) {
+        setMessage('Doação removida com sucesso!')
+        fetchDoacoes()
+      } else {
+        setMessage('Erro ao remover doação')
+      }
+    } catch {
+      setMessage('Erro ao conectar com o servidor')
+    } finally {
+      setDeletingId(null)
     }
   }
 
@@ -278,11 +307,43 @@ export default function AdminPage() {
                           {format(data, 'dd/MM/yyyy (EEEE)', { locale: ptBR })}
                         </div>
                       </div>
-                      {doacoesDia[0]?.observacao && (
-                        <div className="text-xs text-gray-600 bg-white/80 rounded-xl p-3 border border-gray-200/50 max-w-xs text-right">
-                          <span className="font-medium">📝</span> {doacoesDia[0].observacao}
+                      
+                      <div className="flex flex-col items-end space-y-2">
+                        {doacoesDia[0]?.observacao && (
+                          <div className="text-xs text-gray-600 bg-white/80 rounded-xl p-3 border border-gray-200/50 max-w-xs text-right">
+                            <span className="font-medium">📝</span> {doacoesDia[0].observacao}
+                          </div>
+                        )}
+                        
+                        {/* Botão de deletar */}
+                        <div className="flex items-center space-x-2">
+                          {confirmDelete === doacoesDia[0].id ? (
+                            <div className="flex items-center space-x-2">
+                              <span className="text-xs text-red-600 font-medium">Confirmar?</span>
+                              <button
+                                onClick={() => handleDelete(doacoesDia[0].id)}
+                                disabled={deletingId === doacoesDia[0].id}
+                                className="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 disabled:opacity-50"
+                              >
+                                {deletingId === doacoesDia[0].id ? '🗑️' : '✅'}
+                              </button>
+                              <button
+                                onClick={() => setConfirmDelete(null)}
+                                className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200"
+                              >
+                                ❌
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => setConfirmDelete(doacoesDia[0].id)}
+                              className="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 border border-red-300"
+                            >
+                              🗑️ Remover
+                            </button>
+                          )}
                         </div>
-                      )}
+                      </div>
                     </div>
                   </div>
                 )

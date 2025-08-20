@@ -1,0 +1,72 @@
+# 📐 Rules – Boas Práticas para o Cursor
+
+## 1. Organização de Código
+- Usar indentação consistente (2 ou 4 espaços, sem tabs misturados).
+- Nomeclatura semântica:
+  - Variáveis e funções → `camelCase`
+  - Classes e componentes → `PascalCase`
+  - Constantes globais → `UPPER_SNAKE_CASE`
+- Dividir arquivos grandes em módulos menores e coesos.
+- Evitar código morto ou comentários desnecessários.
+
+---
+
+## 2. Arquitetura da Informação
+- Fluxos simples: cada tela/página deve ter **um único objetivo central**.
+- Hierarquia de conteúdo em no máximo **3 níveis** (Ex.: título > seção > detalhe).
+- Navegação consistente (menus, breadcrumbs, botões de ação).
+- Evitar sobrecarga cognitiva → apresentar informação progressivamente.
+
+---
+
+## 3. Design de Interfaces (UI/UX)
+- Tipografia clara e acessível (mínimo 16px para textos).
+- Contraste adequado entre fundo e texto (seguir WCAG AA).
+- Usar princípios de **proximidade, alinhamento e hierarquia visual**.
+- Sempre prever feedback visual para ações (hover, loading, confirmação).
+- Máximo de **2 a 3 cores primárias** + neutros.
+
+---
+
+## 4. Performance
+- Carregar apenas scripts e estilos necessários por página.
+- Utilizar lazy loading para imagens e componentes pesados.
+- Reaproveitar componentes sempre que possível.
+- Aplicar DRY (Don’t Repeat Yourself): evitar repetições de código.
+
+---
+
+## 5. Acessibilidade
+- Elementos interativos com descrições claras (`aria-label`, `alt`, `title`).
+- Interface navegável via teclado (tab/enter/esc).
+- Não depender apenas de cores para transmitir informações.
+- Compatibilidade com leitores de tela.
+
+---
+
+## 6. Documentação
+- Comentários curtos e objetivos apenas quando necessário.
+- Documentar funções públicas e componentes reutilizáveis.
+- README em cada projeto com:
+  - Objetivo
+  - Como rodar localmente
+  - Dependências principais
+  - Fluxo de deploy
+
+---
+
+## 7. Versionamento
+- Branch principal (`main` / `master`) sempre estável.
+- Criar branches descritivas (`feature/login-flow`).
+- Commits claros seguindo **Conventional Commits**:
+  - `feat: adiciona filtro de imóveis`
+  - `fix: corrige bug no layout mobile`
+  - `docs: atualiza instruções de deploy`
+
+---
+
+## 8. Segurança
+- Nunca expor chaves de API ou credenciais no repositório.
+- Usar variáveis de ambiente (`.env`) e ignorar no `.gitignore`.
+- Validar entradas de usuário em formulários.
+- Manter dependências críticas atualizadas.
