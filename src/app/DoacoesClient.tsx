@@ -122,14 +122,8 @@ export default function DoacoesClient() {
           <h3 className="text-lg font-bold text-blue-800 uppercase tracking-wider">
             Histórico de Doações
           </h3>
-          <div className="flex items-center space-x-3">
-            <div className="text-sm text-blue-700 bg-blue-200 px-4 py-2 rounded-full font-bold shadow-md">
-              Últimos 10 registros
-            </div>
-            <div className="flex items-center space-x-2 text-xs text-blue-600">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span>Auto-refresh a cada 30s</span>
-            </div>
+          <div className="text-sm text-blue-700 bg-blue-200 px-4 py-2 rounded-full font-bold shadow-md">
+            Últimos 10 registros
           </div>
         </div>
         
@@ -153,23 +147,17 @@ export default function DoacoesClient() {
                   'bg-gradient-to-r from-amber-50 to-orange-50 border-l-4 border-amber-400'
                 }`}>
                   
-                  {/* Data e Dia */}
-                  <div className="flex items-center space-x-4">
-                    <div className={`text-center min-w-[60px] ${
-                      isToday ? 'text-green-700' : 
-                      isYesterday ? 'text-blue-700' : 
-                      'text-amber-700'
-                    }`}>
-                      <div className="text-2xl font-bold">
-                        {format(data, 'dd', { locale: ptBR })}
-                      </div>
-                      <div className="text-xs font-medium uppercase">
-                        {format(data, 'MMM', { locale: ptBR })}
-                      </div>
+                                    {/* Data */}
+                  <div className={`text-center min-w-[60px] ${
+                    isToday ? 'text-green-700' :
+                    isYesterday ? 'text-blue-700' :
+                    'text-amber-700'
+                  }`}>
+                    <div className="text-2xl font-bold">
+                      {format(data, 'dd', { locale: ptBR })}
                     </div>
-                    
-                    <div className="text-sm text-gray-600">
-                      {format(data, 'EEEE', { locale: ptBR })}
+                    <div className="text-xs font-medium uppercase">
+                      {format(data, 'MMM', { locale: ptBR })}
                     </div>
                   </div>
                   
