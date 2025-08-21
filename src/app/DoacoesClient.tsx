@@ -123,14 +123,6 @@ export default function DoacoesClient() {
       <div className="max-w-4xl mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-12">
-          <div className="mb-6">
-            <img
-              src="/igreja.png"
-              alt="Igreja São Raimundo Nonato"
-              className="mx-auto w-32 h-32 object-cover rounded-lg shadow-lg"
-              style={{ maxWidth: '128px', maxHeight: '128px' }}
-            />
-          </div>
           <h1 className="text-4xl font-bold text-gray-800 mb-2">Paróquia São Raimundo Nonato</h1>
           <p className="text-gray-600">Contador de doações</p>
           <p className="text-sm text-gray-500 mt-2">Última atualização: {lastUpdate}</p>
