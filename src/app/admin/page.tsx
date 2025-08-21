@@ -166,6 +166,12 @@ export default function AdminPage() {
     }
   }
 
+
+
+
+
+
+
   const formatarValor = (valor: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -250,24 +256,24 @@ export default function AdminPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex items-center justify-between">
-              <div>
+              <div className="text-4xl mr-4">💰</div>
+              <div className="flex-1">
                 <p className="text-sm font-medium text-gray-600">Total Geral</p>
                 <p className="text-3xl font-bold text-blue-600">{formatarValor(totais.totalGeral)}</p>
               </div>
-              <div className="text-4xl">💰</div>
             </div>
           </div>
 
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex items-center justify-between">
-              <div>
+              <div className="text-4xl mr-4">📅</div>
+              <div className="flex-1">
                 <p className="text-sm font-medium text-gray-600">Total Hoje</p>
                 <p className="text-3xl font-bold text-green-600">{formatarValor(totais.totalHoje)}</p>
                 <p className={`text-sm px-2 py-1 rounded-full inline-block mt-2 ${getStatusColor(totais.statusHoje)}`}>
                   {getStatusText(totais.statusHoje)}
                 </p>
               </div>
-              <div className="text-4xl">📅</div>
             </div>
           </div>
 
@@ -283,24 +289,7 @@ export default function AdminPage() {
           </div>
         </div>
 
-        {/* Resumo Rápido das Ações */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
-          <h3 className="text-lg font-semibold text-blue-800 mb-4">📋 Guia Rápido de Uso</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-            <div className="bg-white p-3 rounded border">
-              <h4 className="font-semibold text-green-700 mb-2">➕ Iniciar Dia</h4>
-              <p className="text-gray-600">Use para criar um novo dia com valor inicial</p>
-            </div>
-            <div className="bg-white p-3 rounded border">
-              <h4 className="font-semibold text-blue-700 mb-2">🔄 Atualizar Valor</h4>
-              <p className="text-gray-600">Use para modificar o valor durante o dia</p>
-            </div>
-            <div className="bg-white p-3 rounded border">
-              <h4 className="font-semibold text-red-700 mb-2">🔒 Fechar Dia</h4>
-              <p className="text-gray-600">Use para finalizar o dia com valor definitivo</p>
-            </div>
-          </div>
-        </div>
+
 
         {/* Botões de Ação */}
         <div className="flex flex-wrap gap-4 mb-8 justify-center">
@@ -335,22 +324,16 @@ export default function AdminPage() {
           </button>
           
           <button
-            onClick={fetchData}
-            className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg transition-colors"
-          >
-            🔄 Atualizar Dados
-          </button>
-
-          <button
             onClick={() => {
               if (confirm('⚠️ ATENÇÃO: Esta ação irá limpar TODOS os dados do sistema!\n\nDeseja realmente continuar?')) {
                 handleClearData()
               }
             }}
-            className="bg-red-800 hover:bg-red-900 text-white font-bold py-3 px-6 rounded-lg transition-colors"
+            className="bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-6 rounded-lg transition-colors"
           >
             🗑️ Limpar Dados
           </button>
+
         </div>
 
         {/* Formulário */}
@@ -549,6 +532,8 @@ export default function AdminPage() {
             </div>
           )}
         </div>
+
+
       </div>
     </div>
   )

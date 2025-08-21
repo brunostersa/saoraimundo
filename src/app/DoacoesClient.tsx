@@ -99,18 +99,19 @@ export default function DoacoesClient() {
         <div className="space-y-8 mb-8">
           <div className="bg-white rounded-lg shadow-md p-8">
             <div className="flex items-center justify-between">
-              <div>
+              <div className="text-6xl mr-6">💰</div>
+              <div className="flex-1">
                 <p className="text-sm font-medium text-gray-600 mb-2">Total Geral</p>
                 <p className="text-4xl font-bold text-blue-600">{formatarValor(totais.totalGeral)}</p>
                 <p className="text-sm text-gray-500 mt-2">Soma acumulada de todos os dias</p>
               </div>
-              <div className="text-6xl">💰</div>
             </div>
           </div>
 
           <div className="bg-white rounded-lg shadow-md p-8">
             <div className="flex items-center justify-between">
-              <div>
+              <div className="text-6xl mr-6">📅</div>
+              <div className="flex-1">
                 <p className="text-sm font-medium text-gray-600 mb-2">Total Hoje</p>
                 <p className="text-4xl font-bold text-green-600">{formatarValor(totais.totalHoje)}</p>
                 <p className={`text-sm px-3 py-1 rounded-full inline-block mt-2 ${getStatusColor(totais.statusHoje)}`}>
@@ -118,7 +119,6 @@ export default function DoacoesClient() {
                 </p>
                 <p className="text-sm text-gray-500 mt-2">Valor atual do dia</p>
               </div>
-              <div className="text-6xl">📅</div>
             </div>
           </div>
         </div>
