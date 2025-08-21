@@ -62,6 +62,7 @@
   - `feat: adiciona filtro de imóveis`
   - `fix: corrige bug no layout mobile`
   - `docs: atualiza instruções de deploy`
+- Solicitar permissão para subir atualziação no git.
 
 ---
 
