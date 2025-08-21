@@ -1,29 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { format } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
-
-interface Doacao {
-  id: number
-  valor: number
-  data: string
-  observacao?: string
-  createdAt: string
-  updatedAt: string
-}
-
-interface AtualizacaoDiaria {
-  id: number
-  data: string
-  valorInicial: number
-  valorAtual: number
-  valorFinal?: number
-  observacoes: string[]
-  status: 'aberto' | 'fechado'
-  createdAt: string
-  updatedAt: string
-}
 
 interface Totais {
   totalGeral: number
@@ -35,7 +12,6 @@ export default function DoacoesClient() {
   const [loading, setLoading] = useState(true)
   const [totais, setTotais] = useState<Totais>({ totalGeral: 0, totalHoje: 0, statusHoje: 'sem_registro' })
   const [error, setError] = useState<string | null>(null)
-  const [lastUpdate, setLastUpdate] = useState<string>('')
 
   const fetchData = async () => {
     try {
@@ -48,8 +24,6 @@ export default function DoacoesClient() {
         const atualizacoesData = await atualizacoesResponse.json()
         setTotais(atualizacoesData.data.totais)
       }
-
-      setLastUpdate(format(new Date(), 'dd/MM/yyyy HH:mm:ss', { locale: ptBR }))
     } catch (err) {
       console.error('Erro ao buscar dados:', err)
       setError('Erro ao carregar dados. Tente novamente.')

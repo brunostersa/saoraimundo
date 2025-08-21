@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { clearData } from '@/lib/database'
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     console.log('🗑️ Solicitando limpeza de dados...')
     

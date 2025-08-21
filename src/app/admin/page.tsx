@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import Link from 'next/link'
 
 interface Doacao {
   id: number
@@ -235,13 +236,13 @@ export default function AdminPage() {
           <p className="text-sm text-gray-500 mt-2">Última atualização: {lastUpdate}</p>
           
           <div className="mt-4">
-            <a
+            <Link
               href="/"
               className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
             >
               <span className="mr-2">🏠</span>
               Voltar para Home
-            </a>
+            </Link>
           </div>
         </div>
 

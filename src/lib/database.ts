@@ -574,7 +574,7 @@ export async function checkDatabaseSync(): Promise<{
     const cacheCount = cacheDoacoes.length
     
     let databaseCount = 0
-    let differences: string[] = []
+    const differences: string[] = []
     
     if (hasPostgreSQL()) {
       try {
