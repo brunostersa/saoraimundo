@@ -123,8 +123,8 @@ export default function DoacoesClient() {
       <div className="max-w-4xl mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">Sistema de Doações</h1>
-          <p className="text-gray-600">Controle e acompanhamento das doações diárias</p>
+          <h1 className="text-4xl font-bold text-gray-800 mb-2">Paróquia São Raimundo Nonato</h1>
+          <p className="text-gray-600">Contador de doações</p>
           <p className="text-sm text-gray-500 mt-2">Última atualização: {lastUpdate}</p>
         </div>
 
