@@ -1,49 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getDoacoes, createDoacao, clearData, isVercel, hasPostgreSQL, getCacheInfo } from '@/lib/database'
+import { getDoacoes, createDoacao, clearData } from '@/lib/database'
 
 export async function GET() {
   try {
     console.log('🧪 Testando sistema de banco...')
     
     const environment = {
-      isVercel: isVercel(),
-      hasPostgreSQL: hasPostgreSQL(),
       timestamp: new Date().toISOString()
     }
     
     console.log('🌍 Ambiente:', environment)
-    
-    // Obter informações do cache
-    const cacheInfo = await getCacheInfo()
-    console.log('💾 Info do cache:', cacheInfo)
     
     // Testar busca de doações
     const doacoes = await getDoacoes()
     console.log('📊 Doações encontradas:', doacoes.length)
     
     // Testar criação de doação
-    const novaDoacao = await createDoacao({
-      valor: 99.99,
-      observacao: 'Teste automático',
-      data: new Date().toISOString()
-    })
-    console.log('✅ Nova doação criada:', novaDoacao.id)
+    const novaDoacao = await createDoacao(99.99, 'Teste automático')
+    console.log('✅ Nova doação criada:', novaDoacao?.id)
     
     // Buscar novamente para confirmar
     const doacoesAposCriacao = await getDoacoes()
     console.log('📊 Doações após criação:', doacoesAposCriacao.length)
     
-    // Obter info atualizada do cache
-    const cacheInfoAtualizado = await getCacheInfo()
-    
     return NextResponse.json({
       success: true,
       environment,
-      cacheInfo,
-      cacheInfoAtualizado,
       testResults: {
         doacoesIniciais: doacoes.length,
-        novaDoacaoId: novaDoacao.id,
+        novaDoacaoId: novaDoacao?.id,
         doacoesAposCriacao: doacoesAposCriacao.length,
         sistemaFuncionando: true
       },
@@ -56,8 +41,6 @@ export async function GET() {
       success: false,
       error: error instanceof Error ? error.message : 'Erro desconhecido',
       environment: {
-        isVercel: isVercel(),
-        hasPostgreSQL: hasPostgreSQL(),
         timestamp: new Date().toISOString()
       }
     }, { status: 500 })
@@ -78,25 +61,15 @@ export async function POST(request: NextRequest) {
     }
     
     if (action === 'test-create') {
-      const novaDoacao = await createDoacao({
-        valor: Math.random() * 100 + 10,
-        observacao: 'Teste via POST',
-        data: new Date().toISOString()
-      })
+      const novaDoacao = await createDoacao(
+        Math.random() * 100 + 10,
+        'Teste via POST'
+      )
       
       return NextResponse.json({
         success: true,
         doacao: novaDoacao,
         message: 'Doação de teste criada'
-      })
-    }
-    
-    if (action === 'cache-info') {
-      const cacheInfo = await getCacheInfo()
-      return NextResponse.json({
-        success: true,
-        cacheInfo,
-        message: 'Informações do cache obtidas'
       })
     }
     

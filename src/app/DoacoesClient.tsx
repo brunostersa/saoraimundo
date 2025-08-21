@@ -12,7 +12,6 @@ export default function DoacoesClient() {
   const [loading, setLoading] = useState(true)
   const [totais, setTotais] = useState<Totais>({ totalGeral: 0, totalHoje: 0, statusHoje: 'sem_registro' })
   const [error, setError] = useState<string | null>(null)
-  const [lastUpdate, setLastUpdate] = useState<string>('')
 
   const fetchData = async () => {
     try {
@@ -24,10 +23,6 @@ export default function DoacoesClient() {
       if (atualizacoesResponse.ok) {
         const atualizacoesData = await atualizacoesResponse.json()
         setTotais(atualizacoesData.data.totais)
-        setLastUpdate(new Date().toLocaleTimeString('pt-BR', { 
-          hour: '2-digit', 
-          minute: '2-digit' 
-        }))
       }
     } catch (err) {
       console.error('Erro ao buscar dados:', err)

@@ -33,11 +33,14 @@ export async function POST(request: NextRequest) {
     console.log('📝 Observação:', observacao)
     console.log('📅 Data:', data)
 
-    const novaDoacao = await createDoacao({
-      valor,
-      observacao,
-      data
-    })
+    const novaDoacao = await createDoacao(valor, observacao)
+    
+    if (!novaDoacao) {
+      return NextResponse.json(
+        { error: 'Erro ao criar doação' },
+        { status: 500 }
+      )
+    }
 
     console.log('✅ Doação criada:', novaDoacao.id)
     return NextResponse.json(novaDoacao, { status: 201 })

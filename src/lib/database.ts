@@ -17,7 +17,7 @@ export interface AtualizacaoDiaria {
   valorInicial: number
   valorAtual: number
   observacoes: string[] // Array de observações
-  status: 'aberto' | 'fechado'
+  status: 'aberto' | 'fechado' | string // Permitir outros status
   createdAt: Date
   updatedAt: Date
 }
@@ -26,7 +26,7 @@ export interface AtualizacaoDiaria {
 export interface Totais {
   totalGeral: number
   totalHoje: number
-  statusHoje: 'aberto' | 'fechado'
+  statusHoje: 'aberto' | 'fechado' | string // Permitir outros status
 }
 
 // Cliente Prisma global
@@ -35,10 +35,10 @@ let prisma: PrismaClient
 if (process.env.NODE_ENV === 'production') {
   prisma = new PrismaClient()
 } else {
-  if (!(global as any).prisma) {
-    (global as any).prisma = new PrismaClient()
+  if (!(global as { prisma?: PrismaClient }).prisma) {
+    (global as { prisma?: PrismaClient }).prisma = new PrismaClient()
   }
-  prisma = (global as any).prisma
+  prisma = (global as { prisma?: PrismaClient }).prisma!
 }
 
 // Funções para doações
@@ -82,7 +82,7 @@ export async function getAtualizacoesDiarias(): Promise<AtualizacaoDiaria[]> {
       orderBy: { data: 'desc' }
     })
     
-    return atualizacoes.map(update => ({
+    return atualizacoes.map((update) => ({
       ...update,
       observacoes: JSON.parse(update.observacoes)
     }))
@@ -98,7 +98,7 @@ export async function getAllAtualizacoesDiarias(): Promise<AtualizacaoDiaria[]> 
       orderBy: { data: 'desc' }
     })
     
-    return atualizacoes.map(update => ({
+    return atualizacoes.map((update) => ({
       ...update,
       observacoes: JSON.parse(update.observacoes)
     }))
