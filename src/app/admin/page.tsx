@@ -134,6 +134,39 @@ export default function AdminPage() {
     }
   }
 
+  const handleClearData = async () => {
+    if (confirm('⚠️ ATENÇÃO: Esta ação irá limpar TODOS os dados do sistema!\n\nDeseja realmente continuar?')) {
+      try {
+        setLoading(true)
+        setError(null)
+
+        const response = await fetch('/api/clear-data', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+
+        if (response.ok) {
+          const result = await response.json()
+          console.log('✅ Dados limpos com sucesso:', result.message)
+          alert('Dados do sistema foram limpos com sucesso!')
+          await fetchData() // Recarregar dados após a limpeza
+        } else {
+          const errorData = await response.json()
+          setError(errorData.error || 'Erro ao limpar dados')
+          alert('Erro ao limpar dados: ' + (errorData.error || 'Tente novamente.'))
+        }
+      } catch (err) {
+        console.error('Erro ao limpar dados:', err)
+        setError('Erro ao limpar dados. Tente novamente.')
+        alert('Erro ao limpar dados: ' + (err as string))
+      } finally {
+        setLoading(false)
+      }
+    }
+  }
+
   const formatarValor = (valor: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -251,6 +284,25 @@ export default function AdminPage() {
           </div>
         </div>
 
+        {/* Resumo Rápido das Ações */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
+          <h3 className="text-lg font-semibold text-blue-800 mb-4">📋 Guia Rápido de Uso</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+            <div className="bg-white p-3 rounded border">
+              <h4 className="font-semibold text-green-700 mb-2">➕ Iniciar Dia</h4>
+              <p className="text-gray-600">Use para criar um novo dia com valor inicial</p>
+            </div>
+            <div className="bg-white p-3 rounded border">
+              <h4 className="font-semibold text-blue-700 mb-2">🔄 Atualizar Valor</h4>
+              <p className="text-gray-600">Use para modificar o valor durante o dia</p>
+            </div>
+            <div className="bg-white p-3 rounded border">
+              <h4 className="font-semibold text-red-700 mb-2">🔒 Fechar Dia</h4>
+              <p className="text-gray-600">Use para finalizar o dia com valor definitivo</p>
+            </div>
+          </div>
+        </div>
+
         {/* Botões de Ação */}
         <div className="flex flex-wrap gap-4 mb-8 justify-center">
           <button
@@ -289,6 +341,17 @@ export default function AdminPage() {
           >
             🔄 Atualizar Dados
           </button>
+
+          <button
+            onClick={() => {
+              if (confirm('⚠️ ATENÇÃO: Esta ação irá limpar TODOS os dados do sistema!\n\nDeseja realmente continuar?')) {
+                handleClearData()
+              }
+            }}
+            className="bg-red-800 hover:bg-red-900 text-white font-bold py-3 px-6 rounded-lg transition-colors"
+          >
+            🗑️ Limpar Dados
+          </button>
         </div>
 
         {/* Formulário */}
@@ -303,6 +366,37 @@ export default function AdminPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Data</label>
+                <div className="flex gap-2 mb-2">
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, data: new Date().toISOString().split('T')[0] })}
+                    className="px-3 py-1 text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 rounded border"
+                  >
+                    Hoje
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const ontem = new Date()
+                      ontem.setDate(ontem.getDate() - 1)
+                      setFormData({ ...formData, data: ontem.toISOString().split('T')[0] })
+                    }}
+                    className="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded border"
+                  >
+                    Ontem
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const amanha = new Date()
+                      amanha.setDate(amanha.getDate() + 1)
+                      setFormData({ ...formData, data: amanha.toISOString().split('T')[0] })
+                    }}
+                    className="px-3 py-1 text-xs bg-green-100 hover:bg-green-200 text-green-700 rounded border"
+                  >
+                    Amanhã
+                  </button>
+                </div>
                 <input
                   type="date"
                   value={formData.data}
@@ -318,6 +412,29 @@ export default function AdminPage() {
                   {formAction === 'atualizar' && 'Novo Valor'}
                   {formAction === 'fechar' && 'Valor Final'}
                 </label>
+                <div className="flex gap-2 mb-2">
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, valor: '0' })}
+                    className="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded border"
+                  >
+                    R$ 0,00
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, valor: '50' })}
+                    className="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded border"
+                  >
+                    R$ 50,00
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, valor: '100' })}
+                    className="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded border"
+                  >
+                    R$ 100,00
+                  </button>
+                </div>
                 <input
                   type="number"
                   step="0.01"
@@ -332,6 +449,29 @@ export default function AdminPage() {
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Observação</label>
+                <div className="flex gap-2 mb-2">
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, observacao: 'Inicialização do dia' })}
+                    className="px-3 py-1 text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 rounded border"
+                  >
+                    Inicialização
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, observacao: 'Atualização manual' })}
+                    className="px-3 py-1 text-xs bg-green-100 hover:bg-green-200 text-green-700 rounded border"
+                  >
+                    Atualização
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, observacao: 'Fechamento do dia' })}
+                    className="px-3 py-1 text-xs bg-red-100 hover:bg-red-200 text-red-700 rounded border"
+                  >
+                    Fechamento
+                  </button>
+                </div>
                 <input
                   type="text"
                   value={formData.observacao}
