@@ -43,8 +43,7 @@ export default function AdminPage() {
   const [showForm, setShowForm] = useState(false)
   const [formData, setFormData] = useState({
     data: new Date().toISOString().split('T')[0],
-    valor: '',
-    observacao: ''
+    valor: ''
   })
   const [formAction, setFormAction] = useState<'criar' | 'atualizar' | 'fechar'>('criar')
 
@@ -104,7 +103,7 @@ export default function AdminPage() {
           valorInicial: formAction === 'criar' ? parseFloat(formData.valor) : undefined,
           novoValor: formAction === 'atualizar' ? parseFloat(formData.valor) : undefined,
           valorFinal: formAction === 'fechar' ? parseFloat(formData.valor) : undefined,
-          observacao: formData.observacao || 'Atualização manual'
+          observacao: 'Atualização manual'
         })
       })
 
@@ -115,8 +114,7 @@ export default function AdminPage() {
         // Limpar formulário
         setFormData({
           data: new Date().toISOString().split('T')[0],
-          valor: '',
-          observacao: ''
+          valor: ''
         })
         setShowForm(false)
         
@@ -444,40 +442,6 @@ export default function AdminPage() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="0.00"
                   required
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Observação</label>
-                <div className="flex gap-2 mb-2">
-                  <button
-                    type="button"
-                    onClick={() => setFormData({ ...formData, observacao: 'Inicialização do dia' })}
-                    className="px-3 py-1 text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 rounded border"
-                  >
-                    Inicialização
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setFormData({ ...formData, observacao: 'Atualização manual' })}
-                    className="px-3 py-1 text-xs bg-green-100 hover:bg-green-200 text-green-700 rounded border"
-                  >
-                    Atualização
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setFormData({ ...formData, observacao: 'Fechamento do dia' })}
-                    className="px-3 py-1 text-xs bg-red-100 hover:bg-red-200 text-red-700 rounded border"
-                  >
-                    Fechamento
-                  </button>
-                </div>
-                <input
-                  type="text"
-                  value={formData.observacao}
-                  onChange={(e) => setFormData({ ...formData, observacao: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Descrição da atualização"
                 />
               </div>
               
