@@ -23,13 +23,20 @@ export async function GET() {
       const { PrismaClient } = await import('@prisma/client')
       const prisma = new PrismaClient()
       
+      // Log para debug - verificar qual banco está sendo usado
+      console.log('🔍 Tentando conectar com Prisma...')
+      console.log('🌐 DATABASE_URL:', process.env.DATABASE_URL ? 'Configurada' : 'NÃO configurada')
+      
       await prisma.$connect()
+      console.log('✅ Conectado com Prisma!')
+      
       const doacoes = await prisma.doacao.findMany({
         orderBy: {
           data: 'desc'
         }
       })
       
+      console.log('📊 Doações encontradas:', doacoes.length)
       await prisma.$disconnect()
       return NextResponse.json(doacoes)
     } catch (prismaError) {
