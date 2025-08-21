@@ -1,0 +1,153 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { 
+  getAtualizacoesDiarias, 
+  getAtualizacaoDoDia, 
+  criarAtualizacaoDiaria, 
+  atualizarValorDoDia, 
+  fecharDia,
+  getTotais 
+} from '@/lib/database'
+
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const data = searchParams.get('data')
+    
+    if (data) {
+      // Buscar atualização de uma data específica
+      console.log('📅 Buscando atualização para data:', data)
+      const atualizacao = await getAtualizacaoDoDia(data)
+      
+      if (!atualizacao) {
+        return NextResponse.json({
+          success: false,
+          message: 'Data não encontrada',
+          data: null
+        }, { status: 404 })
+      }
+      
+      return NextResponse.json({
+        success: true,
+        data: atualizacao
+      })
+    }
+    
+    // Buscar todas as atualizações
+    console.log('📅 Buscando todas as atualizações diárias')
+    const atualizacoes = await getAtualizacoesDiarias()
+    const totais = await getTotais()
+    
+    return NextResponse.json({
+      success: true,
+      data: {
+        atualizacoes,
+        totais,
+        count: atualizacoes.length
+      }
+    })
+    
+  } catch (error) {
+    console.error('❌ Erro ao buscar atualizações:', error)
+    return NextResponse.json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Erro desconhecido'
+    }, { status: 500 })
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json()
+    const { action, ...data } = body
+    
+    console.log('📝 Ação solicitada:', action)
+    console.log('📋 Dados recebidos:', data)
+    
+    switch (action) {
+      case 'criar':
+        // Criar nova atualização diária
+        if (!data.data || data.valorInicial === undefined) {
+          return NextResponse.json({
+            success: false,
+            error: 'Data e valor inicial são obrigatórios'
+          }, { status: 400 })
+        }
+        
+        const novaAtualizacao = await criarAtualizacaoDiaria({
+          data: data.data,
+          valorInicial: data.valorInicial,
+          observacao: data.observacao
+        })
+        
+        return NextResponse.json({
+          success: true,
+          message: 'Atualização diária criada com sucesso',
+          data: novaAtualizacao
+        }, { status: 201 })
+        
+      case 'atualizar':
+        // Atualizar valor do dia
+        if (!data.data || data.novoValor === undefined || !data.observacao) {
+          return NextResponse.json({
+            success: false,
+            error: 'Data, novo valor e observação são obrigatórios'
+          }, { status: 400 })
+        }
+        
+        const atualizacao = await atualizarValorDoDia(
+          data.data,
+          data.novoValor,
+          data.observacao
+        )
+        
+        return NextResponse.json({
+          success: true,
+          message: 'Valor do dia atualizado com sucesso',
+          data: atualizacao
+        })
+        
+      case 'fechar':
+        // Fechar dia
+        if (!data.data || data.valorFinal === undefined) {
+          return NextResponse.json({
+            success: false,
+            error: 'Data e valor final são obrigatórios'
+          }, { status: 400 })
+        }
+        
+        const diaFechado = await fecharDia(
+          data.data,
+          data.valorFinal,
+          data.observacao
+        )
+        
+        return NextResponse.json({
+          success: true,
+          message: 'Dia fechado com sucesso',
+          data: diaFechado
+        })
+        
+      case 'totais':
+        // Obter totais
+        const totais = await getTotais()
+        
+        return NextResponse.json({
+          success: true,
+          data: totais
+        })
+        
+      default:
+        return NextResponse.json({
+          success: false,
+          error: 'Ação não reconhecida. Use: criar, atualizar, fechar, ou totais'
+        }, { status: 400 })
+    }
+    
+  } catch (error) {
+    console.error('❌ Erro na operação:', error)
+    return NextResponse.json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Erro desconhecido'
+    }, { status: 500 })
+  }
+}
