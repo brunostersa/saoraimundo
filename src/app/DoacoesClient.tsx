@@ -12,6 +12,7 @@ export default function DoacoesClient() {
   const [loading, setLoading] = useState(true)
   const [totais, setTotais] = useState<Totais>({ totalGeral: 0, totalHoje: 0, statusHoje: 'sem_registro' })
   const [error, setError] = useState<string | null>(null)
+  const [lastUpdate, setLastUpdate] = useState<string>('')
 
   const fetchData = async () => {
     try {
@@ -23,6 +24,10 @@ export default function DoacoesClient() {
       if (atualizacoesResponse.ok) {
         const atualizacoesData = await atualizacoesResponse.json()
         setTotais(atualizacoesData.data.totais)
+        setLastUpdate(new Date().toLocaleTimeString('pt-BR', { 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        }))
       }
     } catch (err) {
       console.error('Erro ao buscar dados:', err)
@@ -41,10 +46,19 @@ export default function DoacoesClient() {
   }, [])
 
   const formatarValor = (valor: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(valor)
+    // Garante que o valor seja um número inteiro
+    const valorInteiro = Math.round(valor)
+    
+    if (valorInteiro >= 1000000) {
+      // Para milhões: 1.500.000 -> 1,50 milhões
+      return <span><span className="text-2xl">R$</span> {(valorInteiro / 1000000).toFixed(2).replace('.', ',')} milhões</span>
+    } else if (valorInteiro >= 1000) {
+      // Para milhares: 15.000 -> 15,0 mil
+      return <span><span className="text-2xl">R$</span> {(valorInteiro / 1000).toFixed(1).replace('.', ',')} mil</span>
+    } else {
+      // Para valores menores que 1000, usa formatação com pontos
+      return <span><span className="text-2xl">R$</span> {valorInteiro.toLocaleString('pt-BR')}</span>
+    }
   }
 
   const getStatusColor = (status: string) => {
@@ -65,10 +79,10 @@ export default function DoacoesClient() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
+      <div className="flex justify-center items-center py-8">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Carregando...</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600 text-sm">Carregando...</p>
         </div>
       </div>
     )
@@ -76,14 +90,14 @@ export default function DoacoesClient() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center p-8">
-          <div className="text-red-500 text-6xl mb-4">❌</div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Erro ao carregar dados</h2>
-          <p className="text-gray-600 mb-6">{error}</p>
+      <div className="py-4">
+        <div className="text-center p-4">
+          <div className="text-red-500 text-2xl mb-2">❌</div>
+          <h2 className="text-lg font-bold text-gray-800 mb-2">Erro ao carregar dados</h2>
+          <p className="text-gray-600 text-sm mb-3">{error}</p>
           <button
             onClick={fetchData}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors"
+            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm"
           >
             Tentar Novamente
           </button>
@@ -93,43 +107,36 @@ export default function DoacoesClient() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4">
-        {/* Cards de Totais */}
-        <div className="space-y-8 mb-8">
-          <div className="bg-white rounded-lg shadow-md p-8">
-            <div className="flex items-center justify-between">
-              <div className="text-6xl mr-6">💰</div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-gray-600 mb-2">Total Geral</p>
-                <p className="text-4xl font-bold text-blue-600">{formatarValor(totais.totalGeral)}</p>
-                <p className="text-sm text-gray-500 mt-2">Soma acumulada de todos os dias</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-md p-8">
-            <div className="flex items-center justify-between">
-              <div className="text-6xl mr-6">📅</div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-gray-600 mb-2">Total Hoje</p>
-                <p className="text-4xl font-bold text-green-600">{formatarValor(totais.totalHoje)}</p>
-                <p className={`text-sm px-3 py-1 rounded-full inline-block mt-2 ${getStatusColor(totais.statusHoje)}`}>
-                  {getStatusText(totais.statusHoje)}
-                </p>
-                <p className="text-sm text-gray-500 mt-2">Valor atual do dia</p>
-              </div>
+    <div className="space-y-8">
+      {/* Cards de Totais */}
+      <div className="space-y-8">
+        <div className="bg-white rounded-lg shadow-lg p-12 border border-gray-200">
+          <div className="flex items-center justify-between">
+            <div className="text-7xl mr-10">💰</div>
+            <div className="flex-1">
+              <p className="text-xl font-bold text-gray-700 mb-6 leading-[0.8]">Total Geral</p>
+              <p className="text-5xl font-bold text-blue-600 mb-6 leading-[0.7]">{formatarValor(totais.totalGeral)}</p>
+              <p className="text-sm text-gray-500 leading-[1.0]">Soma acumulada de todos os dias</p>
             </div>
           </div>
         </div>
 
-        {/* Informação sobre acesso ao admin */}
-        <div className="text-center">
-          <p className="text-gray-500 text-sm">
-            Para gerenciar doações e atualizações, acesse o painel administrativo
-          </p>
+        <div className="bg-white rounded-lg shadow-lg p-12 border border-gray-200">
+          <div className="flex items-center justify-between">
+            <div className="text-7xl mr-10">🗓️</div>
+            <div className="flex-1">
+              <p className="text-xl font-bold text-gray-700 mb-6 leading-[0.8]">Total Hoje</p>
+              <p className="text-5xl font-bold text-green-600 mb-6 leading-[0.7]">{formatarValor(totais.totalHoje)}</p>
+              <p className={`text-lg px-6 py-4 rounded-full inline-block mb-6 leading-[0.9] ${getStatusColor(totais.statusHoje)}`}>
+                {getStatusText(totais.statusHoje)}
+              </p>
+              <p className="text-sm text-gray-500 leading-[1.0]">Valor atual do dia</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   )
 }
+
+

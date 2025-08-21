@@ -173,10 +173,19 @@ export default function AdminPage() {
 
 
   const formatarValor = (valor: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(valor)
+    // Garante que o valor seja um número inteiro
+    const valorInteiro = Math.round(valor)
+    
+    if (valorInteiro >= 1000000) {
+      // Para milhões: 1.500.000 -> 1,50 milhões
+      return `R$ ${(valorInteiro / 1000000).toFixed(2).replace('.', ',')} milhões`
+    } else if (valorInteiro >= 1000) {
+      // Para milhares: 15.000 -> 15,0 mil
+      return `R$ ${(valorInteiro / 1000).toFixed(1).replace('.', ',')} mil`
+    } else {
+      // Para valores menores que 1000, usa formatação com pontos
+      return `R$ ${valorInteiro.toLocaleString('pt-BR')}`
+    }
   }
 
   const formatarData = (data: string) => {
@@ -266,7 +275,7 @@ export default function AdminPage() {
 
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex items-center justify-between">
-              <div className="text-4xl mr-4">📅</div>
+              <div className="text-4xl mr-4">🗓️</div>
               <div className="flex-1">
                 <p className="text-sm font-medium text-gray-600">Total Hoje</p>
                 <p className="text-3xl font-bold text-green-600">{formatarValor(totais.totalHoje)}</p>
@@ -484,17 +493,6 @@ export default function AdminPage() {
                         <p className="font-semibold text-green-600">{formatarValor(atualizacao.valorFinal)}</p>
                       </div>
                     )}
-                  </div>
-                  
-                  <div>
-                    <p className="text-sm text-gray-600 mb-2">Observações:</p>
-                    <div className="space-y-1">
-                      {atualizacao.observacoes.map((obs, index) => (
-                        <p key={index} className="text-sm text-gray-700 bg-gray-50 px-2 py-1 rounded">
-                          {obs}
-                        </p>
-                      ))}
-                    </div>
                   </div>
                 </div>
               ))}
