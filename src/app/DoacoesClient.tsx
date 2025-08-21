@@ -121,12 +121,6 @@ export default function DoacoesClient() {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">Paróquia São Raimundo Nonato</h1>
-          <p className="text-gray-600">Contador de doações</p>
-        </div>
-
         {/* Cards de Totais */}
         <div className="space-y-8 mb-8">
           <div className="bg-white rounded-lg shadow-md p-8">
