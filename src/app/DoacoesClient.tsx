@@ -9,6 +9,8 @@ interface Doacao {
   valor: number
   data: string
   observacao?: string
+  createdAt: string
+  updatedAt: string
 }
 
 export default function DoacoesClient() {
@@ -17,12 +19,15 @@ export default function DoacoesClient() {
   const [totalGeral, setTotalGeral] = useState(0)
   const [loading, setLoading] = useState(true)
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date())
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    console.log('🔄 Componente montado, iniciando fetch...')
     fetchDoacoes()
     
     // Auto-refresh a cada 30 segundos
     const interval = setInterval(() => {
+      console.log('🔄 Auto-refresh executando...')
       fetchDoacoes()
     }, 30000) // 30 segundos
     
@@ -32,12 +37,18 @@ export default function DoacoesClient() {
 
   const fetchDoacoes = async () => {
     try {
+      console.log('🔍 Iniciando fetch de doações...')
+      setError(null)
+      
       const response = await fetch('/api/doacoes')
+      console.log('📡 Response status:', response.status)
+      
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
       
       const data = await response.json()
+      console.log('📊 Dados recebidos da API:', data)
       setDoacoes(data)
       
       const hoje = new Date()
@@ -46,15 +57,25 @@ export default function DoacoesClient() {
         return dataDoacao.toDateString() === hoje.toDateString()
       })
       
+      console.log('📅 Doações de hoje:', doacoesHoje)
+      console.log('📅 Data atual:', hoje.toDateString())
+      
       const totalHojeValue = doacoesHoje.reduce((sum: number, d: Doacao) => sum + d.valor, 0)
       const totalGeralValue = data.reduce((sum: number, d: Doacao) => sum + d.valor, 0)
+      
+      console.log('💰 Total hoje:', totalHojeValue)
+      console.log('💰 Total geral:', totalGeralValue)
+      console.log('💰 Soma manual:', data.map((d: Doacao) => d.valor).reduce((a: number, b: number) => a + b, 0))
       
       setTotalHoje(totalHojeValue)
       setTotalGeral(totalGeralValue)
       setLastUpdate(new Date())
       setLoading(false)
+      
+      console.log('✅ Fetch concluído com sucesso!')
     } catch (error) {
-      console.error('Erro ao buscar doações:', error)
+      console.error('❌ Erro ao buscar doações:', error)
+      setError('Erro ao carregar doações. Verifique a conexão.')
       setLoading(false)
     }
   }
@@ -65,6 +86,8 @@ export default function DoacoesClient() {
       currency: 'BRL'
     }).format(valor)
   }
+
+  console.log('🔄 Renderizando componente, estado atual:', { loading, doacoes: doacoes.length, totalHoje, totalGeral })
 
   if (loading) {
     return (
@@ -90,6 +113,24 @@ export default function DoacoesClient() {
           <div className="text-center">
             <p className="text-blue-600 text-sm animate-pulse">Carregando...</p>
           </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-4">
+        <div className="bg-gradient-to-br from-red-50 via-red-100 to-pink-100 rounded-2xl p-6 text-center border-2 border-red-200 shadow-lg">
+          <div className="text-red-400 text-4xl mb-3">⚠️</div>
+          <h3 className="text-lg font-bold text-red-800 mb-2">Erro de Conexão</h3>
+          <p className="text-red-600 mb-4">{error}</p>
+          <button
+            onClick={fetchDoacoes}
+            className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg font-semibold transition-colors"
+          >
+            Tentar Novamente
+          </button>
         </div>
       </div>
     )
@@ -147,7 +188,7 @@ export default function DoacoesClient() {
                   'bg-gradient-to-r from-amber-50 to-orange-50 border-l-4 border-amber-400'
                 }`}>
                   
-                                    {/* Data */}
+                  {/* Data */}
                   <div className={`text-center min-w-[60px] ${
                     isToday ? 'text-green-700' :
                     isYesterday ? 'text-blue-700' :
