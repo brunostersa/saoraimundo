@@ -129,7 +129,7 @@ export default function DoacoesClient() {
         </div>
 
         {/* Cards de Totais */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+        <div className="space-y-8 mb-8">
           <div className="bg-white rounded-lg shadow-md p-8">
             <div className="flex items-center justify-between">
               <div>
