@@ -20,11 +20,11 @@ export default function Home() {
           </div>
           
           {/* Títulos principais */}
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-gray-800 mb-4 leading-tight drop-shadow-lg">
-            Igreja São Raimundo
-          </h1>
+          <h2 className="text-23xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-gray-800 mb-4 leading-tight drop-shadow-lg">
+            Paróquia São Raimundo Nonato
+          </h2>
           <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-gray-700 mb-6 font-medium drop-shadow-md">
-            Sistema de Doações
+            Contador de Doações
           </p>
           
           {/* Informações da Igreja - Compactas */}
