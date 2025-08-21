@@ -128,6 +128,7 @@ export default function DoacoesClient() {
               src="/igreja.png"
               alt="Igreja São Raimundo Nonato"
               className="mx-auto w-32 h-32 object-cover rounded-lg shadow-lg"
+              style={{ maxWidth: '128px', maxHeight: '128px' }}
             />
           </div>
           <h1 className="text-4xl font-bold text-gray-800 mb-2">Paróquia São Raimundo Nonato</h1>
