@@ -311,3 +311,141 @@ export async function getCacheInfo() {
     }
   }
 }
+
+// Função para forçar sincronização com o banco (ignorando cache)
+export async function forceSyncWithDatabase(): Promise<Doacao[]> {
+  try {
+    console.log('🔄 Forçando sincronização com banco...')
+    
+    // Se temos PostgreSQL configurado, forçar busca
+    if (hasPostgreSQL()) {
+      try {
+        console.log('🗄️ Forçando conexão com PostgreSQL...')
+        const { PrismaClient } = await import('@prisma/client')
+        const prisma = new PrismaClient()
+        
+        await prisma.$connect()
+        const doacoes = await prisma.doacao.findMany({
+          orderBy: { data: 'desc' }
+        })
+        await prisma.$disconnect()
+        
+        console.log('✅ Sincronização forçada com PostgreSQL:', doacoes.length)
+        
+        // Atualizar cache local com dados do banco
+        if (doacoes.length > 0) {
+          await globalCache.set('doacoes', doacoes.map(d => ({
+            id: d.id,
+            valor: d.valor,
+            data: d.data.toISOString(),
+            observacao: d.observacao || undefined,
+            createdAt: d.createdAt.toISOString(),
+            updatedAt: d.updatedAt.toISOString()
+          })))
+          
+          const maxId = Math.max(...doacoes.map(d => d.id))
+          await globalCache.set('nextId', maxId + 1)
+          
+          console.log('💾 Cache local atualizado com dados do banco')
+        } else {
+          // Se banco está vazio, limpar cache
+          await globalCache.set('doacoes', [])
+          await globalCache.set('nextId', 1)
+          console.log('🗑️ Cache limpo - banco está vazio')
+        }
+        
+        return doacoes.map(d => ({
+          id: d.id,
+          valor: d.valor,
+          data: d.data.toISOString(),
+          observacao: d.observacao || undefined,
+          createdAt: d.createdAt.toISOString(),
+          updatedAt: d.updatedAt.toISOString()
+        }))
+      } catch (error) {
+        console.log('❌ PostgreSQL falhou na sincronização:', error instanceof Error ? error.message : String(error))
+      }
+    }
+    
+    // Se não temos PostgreSQL, retornar dados do cache
+    console.log('🔄 Usando dados do cache (sem PostgreSQL)')
+    return await globalCache.getAllDoacoes()
+    
+  } catch (error) {
+    console.error('❌ Erro na sincronização forçada:', error)
+    return await globalCache.getAllDoacoes()
+  }
+}
+
+// Função para verificar se há diferenças entre cache e banco
+export async function checkDatabaseSync(): Promise<{
+  inSync: boolean
+  cacheCount: number
+  databaseCount: number
+  differences: string[]
+}> {
+  try {
+    const cacheDoacoes = await globalCache.getAllDoacoes()
+    const cacheCount = cacheDoacoes.length
+    
+    let databaseCount = 0
+    let differences: string[] = []
+    
+    if (hasPostgreSQL()) {
+      try {
+        const { PrismaClient } = await import('@prisma/client')
+        const prisma = new PrismaClient()
+        
+        await prisma.$connect()
+        const dbDoacoes = await prisma.doacao.findMany({
+          orderBy: { data: 'desc' }
+        })
+        await prisma.$disconnect()
+        
+        databaseCount = dbDoacoes.length
+        
+        if (cacheCount !== databaseCount) {
+          differences.push(`Contagem diferente: Cache=${cacheCount}, Banco=${databaseCount}`)
+        }
+        
+        // Verificar IDs
+        const cacheIds = new Set(cacheDoacoes.map(d => d.id))
+        const dbIds = new Set(dbDoacoes.map(d => d.id))
+        
+        const missingInCache = [...dbIds].filter(id => !cacheIds.has(id))
+        const missingInDb = [...cacheIds].filter(id => !dbIds.has(id))
+        
+        if (missingInCache.length > 0) {
+          differences.push(`IDs faltando no cache: ${missingInCache.join(', ')}`)
+        }
+        
+        if (missingInDb.length > 0) {
+          differences.push(`IDs faltando no banco: ${missingInDb.join(', ')}`)
+        }
+        
+      } catch (error) {
+        differences.push(`Erro ao conectar com banco: ${error instanceof Error ? error.message : String(error)}`)
+      }
+    } else {
+      differences.push('PostgreSQL não configurado')
+    }
+    
+    const inSync = differences.length === 0
+    
+    return {
+      inSync,
+      cacheCount,
+      databaseCount,
+      differences
+    }
+    
+  } catch (error) {
+    console.error('Erro ao verificar sincronização:', error)
+    return {
+      inSync: false,
+      cacheCount: 0,
+      databaseCount: 0,
+      differences: [`Erro: ${error instanceof Error ? error.message : String(error)}`]
+    }
+  }
+}

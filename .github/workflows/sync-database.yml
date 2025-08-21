@@ -1,0 +1,141 @@
+name: 🔄 Sincronizar Base de Dados
+
+on:
+  # Execução automática a cada 30 minutos
+  schedule:
+    - cron: '*/30 * * * *'
+  
+  # Execução manual via GitHub
+  workflow_dispatch:
+    inputs:
+      force_sync:
+        description: 'Forçar sincronização completa?'
+        required: false
+        default: 'false'
+        type: boolean
+
+  # Execução quando código é enviado para main
+  push:
+    branches: [ main ]
+
+jobs:
+  sync-database:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 🚀 Iniciar Sincronização
+        run: |
+          echo "🔄 Iniciando sincronização da base de dados..."
+          echo "📅 Data/Hora: $(date)"
+          echo "🌍 Branch: ${{ github.ref_name }}"
+          echo "🔧 Trigger: ${{ github.event_name }}"
+      
+      - name: 📊 Verificar Status Inicial
+        id: check-initial
+        run: |
+          echo "🔍 Verificando status inicial da sincronização..."
+          
+          RESPONSE=$(curl -s -X POST "${{ secrets.VERCEL_URL }}/api/sync" \
+            -H "Content-Type: application/json" \
+            -d '{"action": "check-sync"}' \
+            -w "\n%{http_code}")
+          
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | head -n -1)
+          
+          echo "📋 Resposta HTTP: $HTTP_CODE"
+          echo "📋 Corpo da resposta: $BODY"
+          
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "✅ Status inicial verificado com sucesso"
+            echo "sync_status=success" >> $GITHUB_OUTPUT
+          else
+            echo "❌ Erro ao verificar status inicial"
+            echo "sync_status=failed" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: 🔄 Executar Sincronização
+        id: sync-execution
+        if: steps.check-initial.outputs.sync_status == 'success' || github.event.inputs.force_sync == 'true'
+        run: |
+          echo "🔄 Executando sincronização..."
+          
+          RESPONSE=$(curl -s -X POST "${{ secrets.VERCEL_URL }}/api/sync" \
+            -H "Content-Type: application/json" \
+            -d '{"action": "force-sync"}' \
+            -w "\n%{http_code}")
+          
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | head -n -1)
+          
+          echo "📋 Resposta HTTP: $HTTP_CODE"
+          echo "📋 Corpo da resposta: $BODY"
+          
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "✅ Sincronização executada com sucesso"
+            echo "sync_result=success" >> $GITHUB_OUTPUT
+          else
+            echo "❌ Erro na sincronização"
+            echo "sync_result=failed" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: 🔍 Verificar Status Final
+        id: check-final
+        if: steps.sync-execution.outputs.sync_result == 'success'
+        run: |
+          echo "🔍 Verificando status final..."
+          
+          RESPONSE=$(curl -s -X POST "${{ secrets.VERCEL_URL }}/api/sync" \
+            -H "Content-Type: application/json" \
+            -d '{"action": "status"}' \
+            -w "\n%{http_code}")
+          
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | head -n -1)
+          
+          echo "📋 Resposta HTTP: $HTTP_CODE"
+          echo "📋 Corpo da resposta: $BODY"
+          
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "✅ Status final verificado com sucesso"
+            echo "final_check=success" >> $GITHUB_OUTPUT
+          else
+            echo "❌ Erro ao verificar status final"
+            echo "final_check=failed" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: 📝 Resumo da Execução
+        run: |
+          echo "🎯 Resumo da Sincronização:"
+          echo "----------------------------------------"
+          echo "📅 Data/Hora: $(date)"
+          echo "🌍 Branch: ${{ github.ref_name }}"
+          echo "🔧 Trigger: ${{ github.event_name }}"
+          echo "🔄 Status Inicial: ${{ steps.check-initial.outputs.sync_status }}"
+          
+          if [ "${{ steps.sync-execution.outputs.sync_result }}" != "" ]; then
+            echo "🔄 Sincronização: ${{ steps.sync-execution.outputs.sync_result }}"
+          fi
+          
+          if [ "${{ steps.check-final.outputs.final_check }}" != "" ]; then
+            echo "🔍 Verificação Final: ${{ steps.check-final.outputs.final_check }}"
+          fi
+          
+          echo "----------------------------------------"
+          
+          if [ "${{ steps.check-final.outputs.final_check }}" = "success" ]; then
+            echo "🎉 Sincronização concluída com sucesso!"
+          elif [ "${{ steps.sync-execution.outputs.sync_result }}" = "success" ]; then
+            echo "✅ Sincronização executada, mas verificação final falhou"
+          elif [ "${{ steps.check-initial.outputs.sync_status }}" = "success" ]; then
+            echo "⚠️ Status inicial OK, mas sincronização falhou"
+          else
+            echo "❌ Falha na verificação inicial"
+          fi
+      
+      - name: 🚨 Notificar Falha
+        if: failure()
+        run: |
+          echo "❌ Sincronização falhou!"
+          echo "🔍 Verifique os logs acima para mais detalhes"
+          echo "📧 Considere configurar notificações para falhas"
