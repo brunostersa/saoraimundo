@@ -39,15 +39,6 @@ export default function DoacoesClient() {
   const [error, setError] = useState<string | null>(null)
   const [lastUpdate, setLastUpdate] = useState<string>('')
 
-  // Estados para formulários
-  const [showForm, setShowForm] = useState(false)
-  const [formData, setFormData] = useState({
-    data: new Date().toISOString().split('T')[0],
-    valor: '',
-    observacao: ''
-  })
-  const [formAction, setFormAction] = useState<'criar' | 'atualizar' | 'fechar'>('criar')
-
   const fetchData = async () => {
     try {
       setLoading(true)
@@ -79,60 +70,11 @@ export default function DoacoesClient() {
 
   useEffect(() => {
     fetchData()
-  }, [])
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
     
-    if (!formData.data || !formData.valor) {
-      setError('Data e valor são obrigatórios')
-      return
-    }
-
-    try {
-      setLoading(true)
-      setError(null)
-
-      const response = await fetch('/api/atualizacoes', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          action: formAction,
-          data: formData.data,
-          valorInicial: formAction === 'criar' ? parseFloat(formData.valor) : undefined,
-          novoValor: formAction === 'atualizar' ? parseFloat(formData.valor) : undefined,
-          valorFinal: formAction === 'fechar' ? parseFloat(formData.valor) : undefined,
-          observacao: formData.observacao || 'Atualização manual'
-        })
-      })
-
-      if (response.ok) {
-        const result = await response.json()
-        console.log('✅ Operação realizada:', result.message)
-        
-        // Limpar formulário
-        setFormData({
-          data: new Date().toISOString().split('T')[0],
-          valor: '',
-          observacao: ''
-        })
-        setShowForm(false)
-        
-        // Recarregar dados
-        await fetchData()
-      } else {
-        const errorData = await response.json()
-        setError(errorData.error || 'Erro na operação')
-      }
-    } catch (err) {
-      console.error('Erro na operação:', err)
-      setError('Erro ao realizar operação. Tente novamente.')
-    } finally {
-      setLoading(false)
-    }
-  }
+    // Auto-refresh a cada 30 segundos
+    const interval = setInterval(fetchData, 30000)
+    return () => clearInterval(interval)
+  }, [])
 
   const formatarValor = (valor: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -230,116 +172,16 @@ export default function DoacoesClient() {
           </div>
         </div>
 
-        {/* Botões de Ação */}
-        <div className="flex flex-wrap gap-4 mb-8 justify-center">
-          <button
-            onClick={() => {
-              setFormAction('criar')
-              setShowForm(true)
-            }}
-            className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-colors"
+        {/* Link para Admin */}
+        <div className="text-center mb-8">
+          <a
+            href="/admin"
+            className="inline-flex items-center px-6 py-3 bg-gray-800 hover:bg-gray-900 text-white font-semibold rounded-lg transition-colors"
           >
-            ➕ Iniciar Dia
-          </button>
-          
-          <button
-            onClick={() => {
-              setFormAction('atualizar')
-              setShowForm(true)
-            }}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors"
-          >
-            🔄 Atualizar Valor
-          </button>
-          
-          <button
-            onClick={() => {
-              setFormAction('fechar')
-              setShowForm(true)
-            }}
-            className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition-colors"
-          >
-            🔒 Fechar Dia
-          </button>
-          
-          <button
-            onClick={fetchData}
-            className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg transition-colors"
-          >
-            🔄 Atualizar Dados
-          </button>
+            <span className="mr-2">⚙️</span>
+            Painel de Administração
+          </a>
         </div>
-
-        {/* Formulário */}
-        {showForm && (
-          <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-            <h3 className="text-xl font-bold mb-4">
-              {formAction === 'criar' && 'Iniciar Novo Dia'}
-              {formAction === 'atualizar' && 'Atualizar Valor do Dia'}
-              {formAction === 'fechar' && 'Fechar Dia'}
-            </h3>
-            
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Data</label>
-                <input
-                  type="date"
-                  value={formData.data}
-                  onChange={(e) => setFormData({ ...formData, data: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {formAction === 'criar' && 'Valor Inicial'}
-                  {formAction === 'atualizar' && 'Novo Valor'}
-                  {formAction === 'fechar' && 'Valor Final'}
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={formData.valor}
-                  onChange={(e) => setFormData({ ...formData, valor: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="0.00"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Observação</label>
-                <input
-                  type="text"
-                  value={formData.observacao}
-                  onChange={(e) => setFormData({ ...formData, observacao: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Descrição da atualização"
-                />
-              </div>
-              
-              <div className="flex gap-4">
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-bold py-2 px-4 rounded transition-colors"
-                >
-                  {loading ? 'Processando...' : 'Salvar'}
-                </button>
-                
-                <button
-                  type="button"
-                  onClick={() => setShowForm(false)}
-                  className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded transition-colors"
-                >
-                  Cancelar
-                </button>
-              </div>
-            </form>
-          </div>
-        )}
 
         {/* Histórico de Atualizações Diárias */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
@@ -349,7 +191,7 @@ export default function DoacoesClient() {
             <p className="text-gray-500 text-center py-8">Nenhuma atualização encontrada</p>
           ) : (
             <div className="space-y-4">
-              {atualizacoes.map((atualizacao) => (
+              {atualizacoes.slice(0, 5).map((atualizacao) => (
                 <div key={atualizacao.id} className="border border-gray-200 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="text-lg font-semibold text-gray-800">
@@ -377,18 +219,30 @@ export default function DoacoesClient() {
                     )}
                   </div>
                   
-                  <div>
-                    <p className="text-sm text-gray-600 mb-2">Observações:</p>
-                    <div className="space-y-1">
-                      {atualizacao.observacoes.map((obs, index) => (
-                        <p key={index} className="text-sm text-gray-700 bg-gray-50 px-2 py-1 rounded">
-                          {obs}
-                        </p>
-                      ))}
+                  {atualizacao.observacoes.length > 0 && (
+                    <div>
+                      <p className="text-sm text-gray-600 mb-2">Última observação:</p>
+                      <p className="text-sm text-gray-700 bg-gray-50 px-2 py-1 rounded">
+                        {atualizacao.observacoes[atualizacao.observacoes.length - 1]}
+                      </p>
                     </div>
-                  </div>
+                  )}
                 </div>
               ))}
+              
+              {atualizacoes.length > 5 && (
+                <div className="text-center pt-4 border-t border-gray-200">
+                  <p className="text-sm text-gray-600">
+                    Mostrando 5 de {atualizacoes.length} atualizações
+                  </p>
+                  <a
+                    href="/admin"
+                    className="text-blue-600 hover:text-blue-800 text-sm font-medium mt-2 inline-block"
+                  >
+                    Ver todas as atualizações →
+                  </a>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -401,7 +255,7 @@ export default function DoacoesClient() {
             <p className="text-gray-500 text-center py-8">Nenhuma doação encontrada</p>
           ) : (
             <div className="space-y-4">
-              {doacoes.map((doacao) => (
+              {doacoes.slice(0, 5).map((doacao) => (
                 <div key={doacao.id} className="border border-gray-200 rounded-lg p-4">
                   <div className="flex items-center justify-between">
                     <div>
@@ -420,6 +274,20 @@ export default function DoacoesClient() {
                   </div>
                 </div>
               ))}
+              
+              {doacoes.length > 5 && (
+                <div className="text-center pt-4 border-t border-gray-200">
+                  <p className="text-sm text-gray-600">
+                    Mostrando 5 de {doacoes.length} doações
+                  </p>
+                  <a
+                    href="/admin"
+                    className="text-blue-600 hover:text-blue-800 text-sm font-medium mt-2 inline-block"
+                  >
+                    Ver todas as doações →
+                  </a>
+                </div>
+              )}
             </div>
           )}
         </div>

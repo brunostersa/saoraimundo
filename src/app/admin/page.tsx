@@ -3,107 +3,132 @@
 import { useState, useEffect } from 'react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import Link from 'next/link'
-import Image from 'next/image'
 
 interface Doacao {
   id: number
   valor: number
   data: string
   observacao?: string
+  createdAt: string
+  updatedAt: string
+}
+
+interface AtualizacaoDiaria {
+  id: number
+  data: string
+  valorInicial: number
+  valorAtual: number
+  valorFinal?: number
+  observacoes: string[]
+  status: 'aberto' | 'fechado'
+  createdAt: string
+  updatedAt: string
+}
+
+interface Totais {
+  totalGeral: number
+  totalHoje: number
+  statusHoje: string
 }
 
 export default function AdminPage() {
-  const [valor, setValor] = useState('')
-  const [observacao, setObservacao] = useState('')
-  const [data, setData] = useState(format(new Date(), 'yyyy-MM-dd'))
+  const [loading, setLoading] = useState(true)
   const [doacoes, setDoacoes] = useState<Doacao[]>([])
-  const [loading, setLoading] = useState(false)
-  const [message, setMessage] = useState('')
-  const [deletingId, setDeletingId] = useState<number | null>(null)
-  const [confirmDelete, setConfirmDelete] = useState<number | null>(null)
+  const [atualizacoes, setAtualizacoes] = useState<AtualizacaoDiaria[]>([])
+  const [totais, setTotais] = useState<Totais>({ totalGeral: 0, totalHoje: 0, statusHoje: 'sem_registro' })
+  const [error, setError] = useState<string | null>(null)
+  const [lastUpdate, setLastUpdate] = useState<string>('')
+
+  // Estados para formulários
+  const [showForm, setShowForm] = useState(false)
+  const [formData, setFormData] = useState({
+    data: new Date().toISOString().split('T')[0],
+    valor: '',
+    observacao: ''
+  })
+  const [formAction, setFormAction] = useState<'criar' | 'atualizar' | 'fechar'>('criar')
+
+  const fetchData = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      // Buscar doações
+      const doacoesResponse = await fetch('/api/doacoes')
+      if (doacoesResponse.ok) {
+        const doacoesData = await doacoesResponse.json()
+        setDoacoes(doacoesData)
+      }
+
+      // Buscar atualizações diárias
+      const atualizacoesResponse = await fetch('/api/atualizacoes')
+      if (atualizacoesResponse.ok) {
+        const atualizacoesData = await atualizacoesResponse.json()
+        setAtualizacoes(atualizacoesData.data.atualizacoes)
+        setTotais(atualizacoesData.data.totais)
+      }
+
+      setLastUpdate(format(new Date(), 'dd/MM/yyyy HH:mm:ss', { locale: ptBR }))
+    } catch (err) {
+      console.error('Erro ao buscar dados:', err)
+      setError('Erro ao carregar dados. Tente novamente.')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
-    fetchDoacoes()
+    fetchData()
   }, [])
-
-  const fetchDoacoes = async () => {
-    try {
-      const response = await fetch('/api/doacoes')
-      const data = await response.json()
-      setDoacoes(data)
-    } catch (error) {
-      console.error('Erro ao buscar doações:', error)
-    }
-  }
-
-  const handleDelete = async (id: number) => {
-    if (confirmDelete !== id) {
-      setConfirmDelete(id)
-      return
-    }
-
-    setDeletingId(id)
-    setConfirmDelete(null)
-
-    try {
-      const response = await fetch(`/api/doacoes/${id}`, {
-        method: 'DELETE',
-      })
-
-      if (response.ok) {
-        setMessage('Doação removida com sucesso!')
-        fetchDoacoes()
-      } else {
-        setMessage('Erro ao remover doação')
-      }
-    } catch {
-      setMessage('Erro ao conectar com o servidor')
-    } finally {
-      setDeletingId(null)
-    }
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!valor || parseFloat(valor) <= 0) {
-      setMessage('Por favor, insira um valor válido')
+    if (!formData.data || !formData.valor) {
+      setError('Data e valor são obrigatórios')
       return
     }
-
-    if (!data) {
-      setMessage('Por favor, selecione uma data')
-      return
-    }
-
-    setLoading(true)
-    setMessage('')
 
     try {
-      const response = await fetch('/api/doacoes', {
+      setLoading(true)
+      setError(null)
+
+      const response = await fetch('/api/atualizacoes', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          valor: parseFloat(valor),
-          observacao: observacao.trim() || undefined,
-          data: new Date(data + 'T12:00:00Z').toISOString()
-        }),
+          action: formAction,
+          data: formData.data,
+          valorInicial: formAction === 'criar' ? parseFloat(formData.valor) : undefined,
+          novoValor: formAction === 'atualizar' ? parseFloat(formData.valor) : undefined,
+          valorFinal: formAction === 'fechar' ? parseFloat(formData.valor) : undefined,
+          observacao: formData.observacao || 'Atualização manual'
+        })
       })
 
       if (response.ok) {
-        setValor('')
-        setObservacao('')
-        setData(format(new Date(), 'yyyy-MM-dd'))
-        setMessage('Total diário registrado com sucesso!')
-        fetchDoacoes()
+        const result = await response.json()
+        console.log('✅ Operação realizada:', result.message)
+        
+        // Limpar formulário
+        setFormData({
+          data: new Date().toISOString().split('T')[0],
+          valor: '',
+          observacao: ''
+        })
+        setShowForm(false)
+        
+        // Recarregar dados
+        await fetchData()
       } else {
-        setMessage('Erro ao registrar total diário')
+        const errorData = await response.json()
+        setError(errorData.error || 'Erro na operação')
       }
-    } catch {
-      setMessage('Erro ao conectar com o servidor')
+    } catch (err) {
+      console.error('Erro na operação:', err)
+      setError('Erro ao realizar operação. Tente novamente.')
     } finally {
       setLoading(false)
     }
@@ -116,249 +141,306 @@ export default function AdminPage() {
     }).format(valor)
   }
 
-  const agruparPorDia = (doacoes: Doacao[]) => {
-    const grupos: { [key: string]: Doacao[] } = {}
-    doacoes.forEach(doacao => {
-      const data = new Date(doacao.data)
-      const chave = data.toDateString()
-      if (!grupos[chave]) {
-        grupos[chave] = []
-      }
-      grupos[chave].push(doacao)
-    })
-    return grupos
+  const formatarData = (data: string) => {
+    try {
+      return format(new Date(data), 'dd/MM/yyyy', { locale: ptBR })
+    } catch {
+      return data
+    }
   }
 
-  const grupos = agruparPorDia(doacoes)
-  const diasOrdenados = Object.keys(grupos).sort((a, b) => new Date(b).getTime() - new Date(a).getTime())
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'aberto': return 'text-green-600 bg-green-100'
+      case 'fechado': return 'text-red-600 bg-red-100'
+      default: return 'text-gray-600 bg-gray-100'
+    }
+  }
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'aberto': return '🟢 Aberto'
+      case 'fechado': return '🔴 Fechado'
+      default: return '⚪ Sem registro'
+    }
+  }
+
+  if (loading && doacoes.length === 0) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Carregando...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center p-8">
+          <div className="text-red-500 text-6xl mb-4">❌</div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Erro ao carregar dados</h2>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <button
+            onClick={fetchData}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors"
+          >
+            Tentar Novamente
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div className="min-h-screen p-4 md:p-6 lg:p-8">
-      {/* Header - Reduzido e mais compacto */}
-      <div className="text-center mb-4">
-        <div className="mb-2">
-          <Image
-            src="/logo.png"
-            alt="Logo Igreja São Raimundo"
-            width={200}
-            height={100}
-            className="mx-auto w-16 h-8 sm:w-20 sm:h-10 object-contain drop-shadow-lg"
-            priority
-          />
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-7xl mx-auto px-4">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-gray-800 mb-2">Painel de Administração</h1>
+          <p className="text-gray-600">Controle completo do sistema de doações</p>
+          <p className="text-sm text-gray-500 mt-2">Última atualização: {lastUpdate}</p>
+          
+          <div className="mt-4">
+            <a
+              href="/"
+              className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+            >
+              <span className="mr-2">🏠</span>
+              Voltar para Home
+            </a>
+          </div>
         </div>
-        <h1 className="text-xl sm:text-2xl font-bold text-gray-800 mb-1">
-          Painel Administrativo
-        </h1>
-        <div className="text-gray-700 text-xs mb-2 bg-white/80 backdrop-blur-sm rounded-lg px-3 py-1 border border-igreja-dourado/30 shadow-sm max-w-md mx-auto">
-          <span className="font-medium">Diocese de Araguaína</span>
-          <span className="mx-2 text-gray-400">•</span>
-          <span className="text-gray-600">@saoraimundononato_camposlindos</span>
-        </div>
-        <Link 
-          href="/"
-          className="inline-flex items-center space-x-2 bg-igreja-dourado hover:bg-igreja-dourado/80 text-white px-3 py-1.5 rounded-lg font-semibold transition-all duration-300 text-xs shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
-        >
-          <span>←</span>
-          <span>Voltar para o Painel Público</span>
-        </Link>
-      </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8 max-w-7xl mx-auto">
-        {/* Formulário de Total Diário */}
-        <div className="bg-white/95 backdrop-blur-sm rounded-3xl p-6 md:p-8 border border-igreja-dourado/30 shadow-xl hover:shadow-2xl transition-all duration-300">
-          <div className="text-center mb-6">
-            <div className="w-16 h-16 bg-igreja-dourado/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-3xl">💰</span>
+        {/* Cards de Totais */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Total Geral</p>
+                <p className="text-3xl font-bold text-blue-600">{formatarValor(totais.totalGeral)}</p>
+              </div>
+              <div className="text-4xl">💰</div>
             </div>
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-800">
-              Registrar Total Diário
-            </h2>
-            <p className="text-gray-600 mt-2">Adicione o valor total arrecadado no dia</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <label htmlFor="data" className="block text-gray-700 text-sm font-semibold uppercase tracking-wide">
-                📅 Data
-              </label>
-              <input
-                type="date"
-                id="data"
-                value={data}
-                onChange={(e) => setData(e.target.value)}
-                className="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-xl text-gray-800 focus:outline-none focus:ring-2 focus:ring-igreja-dourado focus:border-igreja-dourado text-base shadow-sm transition-all duration-200 hover:border-igreja-dourado/60"
-                required
-              />
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Total Hoje</p>
+                <p className="text-3xl font-bold text-green-600">{formatarValor(totais.totalHoje)}</p>
+                <p className={`text-sm px-2 py-1 rounded-full inline-block mt-2 ${getStatusColor(totais.statusHoje)}`}>
+                  {getStatusText(totais.statusHoje)}
+                </p>
+              </div>
+              <div className="text-4xl">📅</div>
             </div>
+          </div>
 
-            <div className="space-y-2">
-              <label htmlFor="valor" className="block text-gray-700 text-sm font-semibold uppercase tracking-wide">
-                💵 Total do Dia (R$)
-              </label>
-              <div className="relative">
-                <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-2xl text-gray-400">R$</span>
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Total de Registros</p>
+                <p className="text-3xl font-bold text-purple-600">{atualizacoes.length}</p>
+                <p className="text-sm text-gray-500 mt-2">Dias registrados</p>
+              </div>
+              <div className="text-4xl">📊</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Botões de Ação */}
+        <div className="flex flex-wrap gap-4 mb-8 justify-center">
+          <button
+            onClick={() => {
+              setFormAction('criar')
+              setShowForm(true)
+            }}
+            className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-colors"
+          >
+            ➕ Iniciar Dia
+          </button>
+          
+          <button
+            onClick={() => {
+              setFormAction('atualizar')
+              setShowForm(true)
+            }}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors"
+          >
+            🔄 Atualizar Valor
+          </button>
+          
+          <button
+            onClick={() => {
+              setFormAction('fechar')
+              setShowForm(true)
+            }}
+            className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition-colors"
+          >
+            🔒 Fechar Dia
+          </button>
+          
+          <button
+            onClick={fetchData}
+            className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg transition-colors"
+          >
+            🔄 Atualizar Dados
+          </button>
+        </div>
+
+        {/* Formulário */}
+        {showForm && (
+          <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h3 className="text-xl font-bold mb-4">
+              {formAction === 'criar' && 'Iniciar Novo Dia'}
+              {formAction === 'atualizar' && 'Atualizar Valor do Dia'}
+              {formAction === 'fechar' && 'Fechar Dia'}
+            </h3>
+            
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Data</label>
                 <input
-                  type="number"
-                  id="valor"
-                  value={valor}
-                  onChange={(e) => setValor(e.target.value)}
-                  step="0.01"
-                  min="0.01"
-                  className="w-full pl-12 pr-4 py-4 bg-white border-2 border-gray-300 rounded-xl text-gray-800 text-xl md:text-2xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-igreja-dourado focus:border-igreja-dourado shadow-sm transition-all duration-200 hover:border-igreja-dourado/60"
-                  placeholder="0,00"
+                  type="date"
+                  value={formData.data}
+                  onChange={(e) => setFormData({ ...formData, data: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
               </div>
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="observacao" className="block text-gray-700 text-sm font-semibold uppercase tracking-wide">
-                📝 Observação (opcional)
-              </label>
-              <textarea
-                id="observacao"
-                value={observacao}
-                onChange={(e) => setObservacao(e.target.value)}
-                rows={3}
-                className="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-igreja-dourado focus:border-igreja-dourado resize-none text-base shadow-sm transition-all duration-200 hover:border-igreja-dourado/60"
-                placeholder="Ex: Coleta da missa dominical, evento especial..."
-              />
-            </div>
-
-            {message && (
-              <div className={`p-4 rounded-2xl text-center font-semibold text-base border-2 ${
-                message.includes('sucesso') 
-                  ? 'bg-green-50 text-green-700 border-green-200' 
-                  : 'bg-red-50 text-red-700 border-red-200'
-              }`}>
-                <span className="text-lg mr-2">
-                  {message.includes('sucesso') ? '✅' : '❌'}
-                </span>
-                {message}
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {formAction === 'criar' && 'Valor Inicial'}
+                  {formAction === 'atualizar' && 'Novo Valor'}
+                  {formAction === 'fechar' && 'Valor Final'}
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={formData.valor}
+                  onChange={(e) => setFormData({ ...formData, valor: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="0.00"
+                  required
+                />
               </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-igreja-dourado hover:bg-igreja-dourado/90 text-white py-4 rounded-2xl font-bold text-lg transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:-translate-y-1 active:translate-y-0"
-            >
-              {loading ? (
-                <span className="flex items-center justify-center space-x-2">
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  <span>Registrando...</span>
-                </span>
-              ) : (
-                <span className="flex items-center justify-center space-x-2">
-                  <span>💾</span>
-                  <span>Registrar Total Diário</span>
-                </span>
-              )}
-            </button>
-          </form>
-        </div>
-
-        {/* Histórico de Totais Diários */}
-        <div className="bg-white/95 backdrop-blur-sm rounded-3xl p-6 md:p-8 border border-igreja-dourado/30 shadow-xl hover:shadow-2xl transition-all duration-300">
-          <div className="text-center mb-6">
-            <div className="w-16 h-16 bg-igreja-dourado/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-3xl">📊</span>
-            </div>
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-800">
-              Histórico de Totais
-            </h2>
-            <p className="text-gray-600 mt-2">Acompanhe os valores registrados</p>
-          </div>
-
-          <div className="space-y-4 max-h-96 overflow-y-auto custom-scrollbar">
-            {diasOrdenados.length === 0 ? (
-              <div className="bg-gray-50 rounded-2xl p-8 text-center border-2 border-dashed border-gray-200">
-                <div className="text-gray-400 text-5xl mb-3">📊</div>
-                <p className="text-gray-500 text-base font-medium">Nenhum total diário registrado</p>
-                <p className="text-gray-400 text-sm mt-2">Use o formulário ao lado para começar</p>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Observação</label>
+                <input
+                  type="text"
+                  value={formData.observacao}
+                  onChange={(e) => setFormData({ ...formData, observacao: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Descrição da atualização"
+                />
               </div>
-            ) : (
-              diasOrdenados.map((dia) => {
-                const doacoesDia = grupos[dia]
-                const totalDia = doacoesDia.reduce((sum, d) => sum + d.valor, 0)
-                const data = new Date(dia)
-                const isToday = data.toDateString() === new Date().toDateString()
+              
+              <div className="flex gap-4">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-bold py-2 px-4 rounded transition-colors"
+                >
+                  {loading ? 'Processando...' : 'Salvar'}
+                </button>
                 
-                return (
-                  <div key={dia} className={`bg-gradient-to-r from-white/80 to-white/60 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-200 border-l-4 ${
-                    isToday ? 'border-l-green-400 bg-green-50/50' : 'border-l-igreja-dourado/40'
-                  }`}>
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-3 mb-2">
-                          <div className={`w-3 h-3 rounded-full ${
-                            isToday ? 'bg-green-400' : 'bg-igreja-dourado/60'
-                          }`}></div>
-                          <div className="text-xl font-bold text-gray-800">
-                            {formatarValor(totalDia)}
-                          </div>
-                          {isToday && (
-                            <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">
-                              Hoje
-                            </span>
-                          )}
-                        </div>
-                        <div className="text-sm text-gray-600 ml-6">
-                          {format(data, 'dd/MM/yyyy (EEEE)', { locale: ptBR })}
-                        </div>
+                <button
+                  type="button"
+                  onClick={() => setShowForm(false)}
+                  className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded transition-colors"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* Histórico de Atualizações Diárias */}
+        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">Histórico de Atualizações Diárias</h2>
+          
+          {atualizacoes.length === 0 ? (
+            <p className="text-gray-500 text-center py-8">Nenhuma atualização encontrada</p>
+          ) : (
+            <div className="space-y-4">
+              {atualizacoes.map((atualizacao) => (
+                <div key={atualizacao.id} className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-lg font-semibold text-gray-800">
+                      {formatarData(atualizacao.data)}
+                    </h3>
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(atualizacao.status)}`}>
+                      {getStatusText(atualizacao.status)}
+                    </span>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
+                    <div>
+                      <p className="text-sm text-gray-600">Valor Inicial</p>
+                      <p className="font-semibold">{formatarValor(atualizacao.valorInicial)}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Valor Atual</p>
+                      <p className="font-semibold text-blue-600">{formatarValor(atualizacao.valorAtual)}</p>
+                    </div>
+                    {atualizacao.valorFinal && (
+                      <div>
+                        <p className="text-sm text-gray-600">Valor Final</p>
+                        <p className="font-semibold text-green-600">{formatarValor(atualizacao.valorFinal)}</p>
                       </div>
-                      
-                      <div className="flex flex-col items-end space-y-2">
-                        {doacoesDia[0]?.observacao && (
-                          <div className="text-xs text-gray-600 bg-white/80 rounded-xl p-3 border border-gray-200/50 max-w-xs text-right">
-                            <span className="font-medium">📝</span> {doacoesDia[0].observacao}
-                          </div>
-                        )}
-                        
-                        {/* Botão de deletar */}
-                        <div className="flex items-center space-x-2">
-                          {confirmDelete === doacoesDia[0].id ? (
-                            <div className="flex items-center space-x-2">
-                              <span className="text-xs text-red-600 font-medium">Confirmar?</span>
-                              <button
-                                onClick={() => handleDelete(doacoesDia[0].id)}
-                                disabled={deletingId === doacoesDia[0].id}
-                                className="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 disabled:opacity-50"
-                              >
-                                {deletingId === doacoesDia[0].id ? '🗑️' : '✅'}
-                              </button>
-                              <button
-                                onClick={() => setConfirmDelete(null)}
-                                className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200"
-                              >
-                                ❌
-                              </button>
-                            </div>
-                          ) : (
-                            <button
-                              onClick={() => setConfirmDelete(doacoesDia[0].id)}
-                              className="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 border border-red-300"
-                            >
-                              🗑️ Remover
-                            </button>
-                          )}
-                        </div>
-                      </div>
+                    )}
+                  </div>
+                  
+                  <div>
+                    <p className="text-sm text-gray-600 mb-2">Observações:</p>
+                    <div className="space-y-1">
+                      {atualizacao.observacoes.map((obs, index) => (
+                        <p key={index} className="text-sm text-gray-700 bg-gray-50 px-2 py-1 rounded">
+                          {obs}
+                        </p>
+                      ))}
                     </div>
                   </div>
-                )
-              })
-            )}
-          </div>
-
-          {diasOrdenados.length > 0 && (
-            <div className="mt-6 pt-4 border-t-2 border-igreja-dourado/20">
-              <div className="text-center">
-                <div className="text-2xl md:text-3xl font-bold text-igreja-dourado mb-2">
-                  Total Geral: {formatarValor(doacoes.reduce((sum, d) => sum + d.valor, 0))}
                 </div>
-                <p className="text-gray-600 text-sm">Soma de todos os dias registrados</p>
-              </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Histórico de Doações Individuais */}
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">Histórico de Doações Individuais</h2>
+          
+          {doacoes.length === 0 ? (
+            <p className="text-gray-500 text-center py-8">Nenhuma doação encontrada</p>
+          ) : (
+            <div className="space-y-4">
+              {doacoes.map((doacao) => (
+                <div key={doacao.id} className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-semibold text-lg">{formatarValor(doacao.valor)}</p>
+                      <p className="text-sm text-gray-600">{formatarData(doacao.data)}</p>
+                      {doacao.observacao && (
+                        <p className="text-sm text-gray-700 mt-1">{doacao.observacao}</p>
+                      )}
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-gray-500">ID: {doacao.id}</p>
+                      <p className="text-xs text-gray-500">
+                        {format(new Date(doacao.createdAt), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>
