@@ -50,9 +50,33 @@ export async function POST(request: NextRequest) {
       })
     }
     
+    if (action === 'check-sync') {
+      console.log('🔍 Verificando status da sincronização...')
+      const doacoes = await getDoacoes()
+      
+      return NextResponse.json({
+        success: true,
+        message: 'Status verificado com sucesso',
+        doacoesCount: doacoes.length,
+        lastSync: new Date().toISOString()
+      })
+    }
+    
+    if (action === 'force-sync') {
+      console.log('🔄 Forçando sincronização...')
+      const doacoes = await getDoacoes()
+      
+      return NextResponse.json({
+        success: true,
+        message: 'Sincronização forçada executada com sucesso',
+        doacoesCount: doacoes.length,
+        lastSync: new Date().toISOString()
+      })
+    }
+    
     return NextResponse.json({
       success: false,
-      error: 'Ação não reconhecida. Use: clear-cache ou status'
+      error: 'Ação não reconhecida. Use: clear-cache, status, check-sync ou force-sync'
     }, { status: 400 })
     
   } catch (error) {

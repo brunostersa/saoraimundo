@@ -1,9 +1,9 @@
 name: 🔄 Sincronizar Base de Dados
 
 on:
-  # Execução automática a cada 30 minutos
-  schedule:
-    - cron: '*/30 * * * *'
+  # Execução automática a cada 30 minutos - DESABILITADO
+  # schedule:
+  #   - cron: '*/30 * * * *'
   
   # Execução manual via GitHub
   workflow_dispatch:
