@@ -12,6 +12,7 @@ export default function DoacoesClient() {
   const [loading, setLoading] = useState(true)
   const [totais, setTotais] = useState<Totais>({ totalGeral: 0, totalHoje: 0, statusHoje: 'sem_registro' })
   const [error, setError] = useState<string | null>(null)
+  const [mounted, setMounted] = useState(false)
 
   const fetchData = async () => {
     try {
@@ -33,6 +34,7 @@ export default function DoacoesClient() {
   }
 
   useEffect(() => {
+    setMounted(true)
     fetchData()
     
     // Auto-refresh a cada 30 segundos
@@ -51,8 +53,8 @@ export default function DoacoesClient() {
       // Para milhares: 15.000 -> 15,0 mil
       return <span><span className="text-2xl">R$</span> {(valorInteiro / 1000).toFixed(1).replace('.', ',')} mil</span>
     } else {
-      // Para valores menores que 1000, usa formatação com pontos
-      return <span><span className="text-2xl">R$</span> {valorInteiro.toLocaleString('pt-BR')}</span>
+      // Para valores menores que 1000, usa formatação simples
+      return <span><span className="text-2xl">R$</span> {valorInteiro.toString()}</span>
     }
   }
 
@@ -70,6 +72,18 @@ export default function DoacoesClient() {
       case 'fechado': return '🔴 Fechado'
       default: return '⚪ Sem registro'
     }
+  }
+
+  // Evita hidratação até o componente estar montado
+  if (!mounted) {
+    return (
+      <div className="flex justify-center items-center py-8">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600 text-sm">Carregando...</p>
+        </div>
+      </div>
+    )
   }
 
   if (loading) {
