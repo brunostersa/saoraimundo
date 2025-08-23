@@ -34,7 +34,16 @@ export async function GET(request: NextRequest) {
     // Buscar todas as atualizações
     console.log('📅 Buscando todas as atualizações diárias')
     const resultado = await getAtualizacoesDiarias()
-    let atualizacoes = resultado.atualizacoes || []
+    
+    // Lidar com diferentes tipos de retorno (SQLite vs PostgreSQL)
+    let atualizacoes: any[] = []
+    if (Array.isArray(resultado)) {
+      // SQLite retorna array direto
+      atualizacoes = resultado
+    } else if (resultado && typeof resultado === 'object' && 'atualizacoes' in resultado) {
+      // PostgreSQL retorna objeto com atualizacoes e totais
+      atualizacoes = resultado.atualizacoes || []
+    }
     
     // Se não há atualizações, criar uma inicial
     if (atualizacoes.length === 0) {

@@ -6,7 +6,17 @@ export async function GET() {
     console.log('📤 Exportando dados...')
     
     const doacoes = await getDoacoes()
-    const atualizacoes = await getAtualizacoesDiarias()
+    const resultadoAtualizacoes = await getAtualizacoesDiarias()
+    
+    // Lidar com diferentes tipos de retorno (SQLite vs PostgreSQL)
+    let atualizacoes: any[] = []
+    if (Array.isArray(resultadoAtualizacoes)) {
+      // SQLite retorna array direto
+      atualizacoes = resultadoAtualizacoes
+    } else if (resultadoAtualizacoes && typeof resultadoAtualizacoes === 'object' && 'atualizacoes' in resultadoAtualizacoes) {
+      // PostgreSQL retorna objeto com atualizacoes e totais
+      atualizacoes = resultadoAtualizacoes.atualizacoes || []
+    }
     
     const exportData = {
       doacoes,

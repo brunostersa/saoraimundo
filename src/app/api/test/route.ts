@@ -10,7 +10,18 @@ export async function GET() {
     console.log('✅ Doações:', doacoes.length)
     
     // Teste 2: Buscar atualizações
-    const atualizacoes = await getAtualizacoesDiarias()
+    const resultadoAtualizacoes = await getAtualizacoesDiarias()
+    
+    // Lidar com diferentes tipos de retorno (SQLite vs PostgreSQL)
+    let atualizacoes: any[] = []
+    if (Array.isArray(resultadoAtualizacoes)) {
+      // SQLite retorna array direto
+      atualizacoes = resultadoAtualizacoes
+    } else if (resultadoAtualizacoes && typeof resultadoAtualizacoes === 'object' && 'atualizacoes' in resultadoAtualizacoes) {
+      // PostgreSQL retorna objeto com atualizacoes e totais
+      atualizacoes = resultadoAtualizacoes.atualizacoes || []
+    }
+    
     console.log('✅ Atualizações:', atualizacoes.length)
     
     // Teste 3: Calcular totais
