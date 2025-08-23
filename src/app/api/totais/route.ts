@@ -7,7 +7,8 @@ export async function GET() {
     
     const totais = await getTotais()
     
-    console.log('✅ Totais obtidos:', totais)
+    console.log('✅ Totais obtidos da API:', totais)
+    console.log('📊 Estrutura dos totais:', JSON.stringify(totais, null, 2))
     
     return NextResponse.json({
       success: true,

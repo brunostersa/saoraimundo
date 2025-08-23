@@ -20,10 +20,9 @@ export interface Doacao {
 }
 
 export interface Totais {
-  totalDoacoes: number
-  totalAtualizacoes: number
-  valorTotal: number
-  ultimaAtualizacao?: string
+  totalGeral: number
+  totalHoje: number
+  statusHoje: 'sem_registro' | 'com_registro'
 }
 
 // Interfaces para operações

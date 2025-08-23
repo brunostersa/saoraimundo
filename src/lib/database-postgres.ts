@@ -373,31 +373,39 @@ export class PostgreSQLDatabase {
   }
 
   private async calcularTotais(client: PoolClient): Promise<Totais> {
-    // Verificar se as tabelas existem
-    await this.ensureTablesExist(client)
-    
-    // Total geral (soma de todas as doações)
-    const doacoesResult = await client.query(`
-      SELECT COALESCE(SUM(valor), 0) as total
-      FROM "Doacao"
-    `)
-    
-    const totalGeral = parseFloat(doacoesResult.rows[0].total)
-    
-    // Total de hoje
-    const hoje = new Date().toISOString().split('T')[0]
-    const hojeResult = await client.query(`
-      SELECT COALESCE(SUM(valor), 0) as total
-      FROM "Doacao"
-      WHERE data = $1
-    `, [hoje])
-    
-    const totalHoje = parseFloat(hojeResult.rows[0].total)
-    
-    // Status de hoje
-    const statusHoje: 'sem_registro' | 'com_registro' = totalHoje > 0 ? 'com_registro' : 'sem_registro'
-    
-    return { totalGeral, totalHoje, statusHoje }
+    try {
+      // Total geral (soma de todas as doações)
+      const doacoesResult = await client.query(`
+        SELECT COALESCE(SUM(valor), 0) as total
+        FROM "Doacao"
+      `)
+      
+      const totalGeral = parseFloat(doacoesResult.rows[0].total)
+      console.log('💰 Total geral calculado:', totalGeral)
+      
+      // Total de hoje
+      const hoje = new Date().toISOString().split('T')[0]
+      const hojeResult = await client.query(`
+        SELECT COALESCE(SUM(valor), 0) as total
+        FROM "Doacao"
+        WHERE data = $1
+      `, [hoje])
+      
+      const totalHoje = parseFloat(hojeResult.rows[0].total)
+      console.log('🗓️ Total de hoje calculado:', totalHoje, 'Data:', hoje)
+      
+      // Status de hoje
+      const statusHoje: 'sem_registro' | 'com_registro' = totalHoje > 0 ? 'com_registro' : 'sem_registro'
+      
+      const resultado = { totalGeral, totalHoje, statusHoje }
+      console.log('📊 Totais finais:', resultado)
+      
+      return resultado
+    } catch (error) {
+      console.error('❌ Erro ao calcular totais:', error)
+      // Retornar valores padrão em caso de erro
+      return { totalGeral: 0, totalHoje: 0, statusHoje: 'sem_registro' }
+    }
   }
 
   // ===== UTILIDADES =====
