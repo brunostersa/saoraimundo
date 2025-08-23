@@ -34,7 +34,29 @@ export async function GET(request: NextRequest) {
     
     // Buscar todas as atualizações
     console.log('📅 Buscando todas as atualizações diárias')
-    const atualizacoes = await getAtualizacoesDiarias()
+    let atualizacoes = await getAtualizacoesDiarias()
+    
+    // Se não há atualizações, criar uma inicial
+    if (atualizacoes.length === 0) {
+      console.log('🚀 Banco vazio detectado, criando atualização inicial...')
+      const hoje = new Date().toISOString().split('T')[0]
+      
+      try {
+        const atualizacaoInicial = await criarAtualizacaoDiaria({
+          data: hoje,
+          valorInicial: 0,
+          observacao: 'Banco inicializado automaticamente'
+        })
+        
+        if (atualizacaoInicial) {
+          console.log('✅ Atualização inicial criada:', atualizacaoInicial.id)
+          atualizacoes = [atualizacaoInicial]
+        }
+      } catch (initError) {
+        console.error('❌ Erro ao criar atualização inicial:', initError)
+      }
+    }
+    
     const totais = await getTotais()
     
     return NextResponse.json({
