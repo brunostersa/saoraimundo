@@ -222,7 +222,7 @@ export class PostgreSQLDatabase {
         ...row,
         valorInicial: parseFloat(row.valorInicial),
         valorAtual: parseFloat(row.valorAtual),
-        observacoes: Array.isArray(row.observacoes) ? row.observacoes : [],
+        observacoes: typeof row.observacoes === 'string' ? JSON.parse(row.observacoes) : (Array.isArray(row.observacoes) ? row.observacoes : []),
         data: row.data.toISOString().split('T')[0],
         createdAt: row.createdAt.toISOString(),
         updatedAt: row.updatedAt.toISOString()
@@ -254,7 +254,7 @@ export class PostgreSQLDatabase {
         ...row,
         valorInicial: parseFloat(row.valorInicial),
         valorAtual: parseFloat(row.valorAtual),
-        observacoes: Array.isArray(row.observacoes) ? row.observacoes : [],
+        observacoes: typeof row.observacoes === 'string' ? JSON.parse(row.observacoes) : (Array.isArray(row.observacoes) ? row.observacoes : []),
         data: row.data.toISOString().split('T')[0],
         createdAt: row.createdAt.toISOString(),
         updatedAt: row.updatedAt.toISOString()
@@ -274,7 +274,7 @@ export class PostgreSQLDatabase {
         INSERT INTO "AtualizacaoDiaria" (data, "valorInicial", "valorAtual", observacoes)
         VALUES ($1, $2, $3, $4)
         RETURNING id
-      `, [data.data, data.valorInicial, data.valorInicial, observacoes])
+      `, [data.data, data.valorInicial, data.valorInicial, JSON.stringify(observacoes)])
       
       return result.rows[0].id
     } finally {
@@ -308,7 +308,7 @@ export class PostgreSQLDatabase {
         UPDATE "AtualizacaoDiaria"
         SET "valorAtual" = $1, observacoes = $2, "updatedAt" = CURRENT_TIMESTAMP
         WHERE data = $3
-      `, [data.novoValor, observacoes, data.data])
+      `, [data.novoValor, JSON.stringify(observacoes), data.data])
       
       return result.rowCount ? result.rowCount > 0 : false
     } finally {
