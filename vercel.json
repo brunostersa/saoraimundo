@@ -3,21 +3,6 @@
   "outputDirectory": ".next",
   "framework": "nextjs",
   "installCommand": "npm install",
-  "devCommand": "npm dev",
-  "regions": ["gru1"],
-  "functions": {
-    "src/app/api/**/*.ts": {
-      "maxDuration": 30
-    }
-  },
-  "env": {
-    "PRISMA_GENERATE_DATAPROXY": "false",
-    "DATABASE_URL": "file:./database.db"
-  },
-  "build": {
-    "env": {
-      "PRISMA_GENERATE_DATAPROXY": "false",
-      "DATABASE_URL": "file:./database.db"
-    }
-  }
+  "devCommand": "npm run dev",
+  "regions": ["gru1"]
 }
