@@ -41,6 +41,19 @@ export async function GET(request: NextRequest) {
       const hoje = new Date().toISOString().split('T')[0]
       
       try {
+        // Tentar inicializar o banco PostgreSQL se necessário
+        const dbType = process.env.DATABASE_TYPE || 'sqlite'
+        if (dbType === 'postgres') {
+          try {
+            const { getDatabase } = await import('@/lib/database-postgres')
+            const db = getDatabase()
+            await db.initialize()
+            console.log('✅ Banco PostgreSQL inicializado')
+          } catch (initError) {
+            console.error('❌ Erro ao inicializar PostgreSQL:', initError)
+          }
+        }
+        
         const atualizacaoInicial = await criarAtualizacaoDiaria({
           data: hoje,
           valorInicial: 0,
