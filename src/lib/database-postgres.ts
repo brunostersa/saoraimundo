@@ -154,18 +154,28 @@ export class PostgreSQLDatabase {
       // Verificar se as tabelas existem e criar se necessário
       await this.ensureTablesExist(client)
       
+      console.log('🔍 Buscando doações na tabela Doacao...')
+      
       const result = await client.query(`
         SELECT id, valor, observacao, data, "createdAt"
         FROM "Doacao"
         ORDER BY "createdAt" DESC
       `)
       
-      return result.rows.map(row => ({
+      console.log('📊 Resultado da query:', result.rows.length, 'linhas')
+      console.log('📋 Dados brutos:', JSON.stringify(result.rows, null, 2))
+      
+      const doacoes = result.rows.map(row => ({
         ...row,
         valor: parseFloat(row.valor),
         data: row.data.toISOString().split('T')[0],
         createdAt: row.createdAt.toISOString()
       }))
+      
+      console.log('💰 Doações processadas:', doacoes.length)
+      console.log('📊 Valores das doações:', doacoes.map(d => ({ id: d.id, valor: d.valor, data: d.data })))
+      
+      return doacoes
     } finally {
       client.release()
     }
@@ -178,13 +188,21 @@ export class PostgreSQLDatabase {
       // Verificar se as tabelas existem
       await this.ensureTablesExist(client)
       
+      console.log('💾 Criando doação:', data)
+      
+      const dataHoje = data.data || new Date().toISOString().split('T')[0]
+      console.log('📅 Data da doação:', dataHoje)
+      
       const result = await client.query(`
         INSERT INTO "Doacao" (valor, observacao, data)
         VALUES ($1, $2, $3)
         RETURNING id
-      `, [data.valor, data.observacao || null, data.data || new Date().toISOString().split('T')[0]])
+      `, [data.valor, data.observacao || null, dataHoje])
       
-      return result.rows[0].id
+      const id = result.rows[0].id
+      console.log('✅ Doação criada com ID:', id)
+      
+      return id
     } finally {
       client.release()
     }
