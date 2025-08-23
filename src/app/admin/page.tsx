@@ -5,14 +5,7 @@ import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import Link from 'next/link'
 
-interface Doacao {
-  id: number
-  valor: number
-  data: string
-  observacao?: string
-  createdAt: string
-  updatedAt: string
-}
+
 
 interface AtualizacaoDiaria {
   id: number
@@ -34,7 +27,7 @@ interface Totais {
 
 export default function AdminPage() {
   const [loading, setLoading] = useState(true)
-  const [doacoes, setDoacoes] = useState<Doacao[]>([])
+
   const [atualizacoes, setAtualizacoes] = useState<AtualizacaoDiaria[]>([])
   const [totais, setTotais] = useState<Totais>({ totalGeral: 0, totalHoje: 0, statusHoje: 'sem_registro' })
   const [error, setError] = useState<string | null>(null)
@@ -52,13 +45,6 @@ export default function AdminPage() {
     try {
       setLoading(true)
       setError(null)
-
-      // Buscar doações
-      const doacoesResponse = await fetch('/api/doacoes')
-      if (doacoesResponse.ok) {
-        const doacoesData = await doacoesResponse.json()
-        setDoacoes(doacoesData.data || [])
-      }
 
       // Buscar atualizações diárias
       const atualizacoesResponse = await fetch('/api/atualizacoes')
@@ -211,7 +197,7 @@ export default function AdminPage() {
     }
   }
 
-  if (loading && doacoes.length === 0) {
+  if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="text-center">
@@ -487,36 +473,7 @@ export default function AdminPage() {
           )}
         </div>
 
-        {/* Histórico de Doações Individuais */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">Histórico de Doações Individuais</h2>
-          
-          {doacoes.length === 0 ? (
-            <p className="text-gray-500 text-center py-8">Nenhuma doação encontrada</p>
-          ) : (
-            <div className="space-y-4">
-              {doacoes.map((doacao) => (
-                <div key={doacao.id} className="border border-gray-200 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-semibold text-lg">{formatarValor(doacao.valor)}</p>
-                      <p className="text-sm text-gray-600">{formatarData(doacao.data)}</p>
-                      {doacao.observacao && (
-                        <p className="text-sm text-gray-700 mt-1">{doacao.observacao}</p>
-                      )}
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xs text-gray-500">ID: {doacao.id}</p>
-                      <p className="text-xs text-gray-500">
-                        {format(new Date(doacao.createdAt), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+
 
 
       </div>
