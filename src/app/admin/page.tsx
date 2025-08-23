@@ -57,15 +57,15 @@ export default function AdminPage() {
       const doacoesResponse = await fetch('/api/doacoes')
       if (doacoesResponse.ok) {
         const doacoesData = await doacoesResponse.json()
-        setDoacoes(doacoesData)
+        setDoacoes(doacoesData.data || [])
       }
 
       // Buscar atualizações diárias
       const atualizacoesResponse = await fetch('/api/atualizacoes')
       if (atualizacoesResponse.ok) {
         const atualizacoesData = await atualizacoesResponse.json()
-        setAtualizacoes(atualizacoesData.data.atualizacoes)
-        setTotais(atualizacoesData.data.totais)
+        setAtualizacoes(atualizacoesData.data.atualizacoes || [])
+        setTotais(atualizacoesData.data.totais || { totalGeral: 0, totalHoje: 0, statusHoje: 'sem_registro' })
       }
 
       setLastUpdate(format(new Date(), 'dd/MM/yyyy HH:mm:ss', { locale: ptBR }))
