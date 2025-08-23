@@ -42,8 +42,8 @@ export default function Home() {
   if (!mounted) {
     return (
       <div className="min-h-screen flex flex-col lg:flex-row">
-        {/* Seção Principal - 75% - Imagem Full da Igreja */}
-        <div className="w-full lg:w-3/4 relative">
+        {/* Seção Principal - 65% - Imagem Full da Igreja */}
+        <div className="w-full lg:w-[65%] relative">
           {/* Imagem de Fundo Full Screen */}
           <div className="absolute inset-0">
             <Image
@@ -92,8 +92,8 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Seção Lateral - 25% - Informações de Doações */}
-        <div className="w-full lg:w-1/4 bg-white/95 backdrop-blur-sm border-t lg:border-t-0 lg:border-l border-gray-200 p-3 lg:p-4 shadow-xl flex flex-col h-screen">
+        {/* Seção Lateral - 35% - Informações de Doações */}
+        <div className="w-full lg:w-[35%] bg-white/95 backdrop-blur-sm border-t lg:border-t-0 lg:border-l border-gray-200 p-3 lg:p-4 shadow-xl flex flex-col h-screen">
           {/* Header da seção lateral */}
           <div className="text-center mb-3">
             <h2 className="text-lg sm:text-xl font-bold text-gray-800">
@@ -168,8 +168,8 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
-      {/* Seção Principal - 75% - Imagem Full da Igreja */}
-      <div className="w-full lg:w-3/4 relative">
+              {/* Seção Principal - 65% - Imagem Full da Igreja */}
+        <div className="w-full lg:w-[65%] relative">
         {/* Imagem de Fundo Full Screen */}
         <div className="absolute inset-0">
           <Image
@@ -218,8 +218,8 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Seção Lateral - 25% - Informações de Doações */}
-      <div className="w-full lg:w-1/4 bg-white/95 backdrop-blur-sm border-t lg:border-t-0 lg:border-l border-gray-200 p-3 lg:p-4 shadow-xl flex flex-col h-screen">
+              {/* Seção Lateral - 35% - Informações de Doações */}
+        <div className="w-full lg:w-[35%] bg-white/95 backdrop-blur-sm border-t lg:border-t-0 lg:border-l border-gray-200 p-3 lg:p-4 shadow-xl flex flex-col h-screen">
         {/* Header da seção lateral */}
         <div className="text-center mb-3">
           <h2 className="text-lg sm:text-xl font-bold text-gray-800">
