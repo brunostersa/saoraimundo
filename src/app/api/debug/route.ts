@@ -21,7 +21,7 @@ export async function GET() {
     let postgresAvailable = false
     
     try {
-      const sqlite = await import('@/lib/database-sqlite')
+      await import('@/lib/database-sqlite')
       sqliteAvailable = true
       console.log('✅ SQLite disponível')
     } catch (error) {
@@ -29,7 +29,7 @@ export async function GET() {
     }
     
     try {
-      const postgres = await import('@/lib/database-postgres')
+      await import('@/lib/database-postgres')
       postgresAvailable = true
       console.log('✅ PostgreSQL disponível')
     } catch (error) {

@@ -32,7 +32,7 @@ export async function getDoacoes() {
   return await db.getDoacoes()
 }
 
-export async function createDoacao(data: any) {
+export async function createDoacao(data: CriarDoacaoData) {
   const db = getActiveDatabase()
   return await db.createDoacao(data)
 }
@@ -52,12 +52,12 @@ export async function getAtualizacaoDoDia(data: string) {
   return await db.getAtualizacaoDoDia(data)
 }
 
-export async function criarAtualizacaoDiaria(data: any) {
+export async function criarAtualizacaoDiaria(data: CriarAtualizacaoData) {
   const db = getActiveDatabase()
   return await db.criarAtualizacaoDiaria(data)
 }
 
-export async function atualizarValorDoDia(data: any) {
+export async function atualizarValorDoDia(data: AtualizarValorData) {
   const db = getActiveDatabase()
   return await db.atualizarValorDoDia(data)
 }

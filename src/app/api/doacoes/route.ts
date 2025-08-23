@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getDoacoes, createDoacao } from '@/lib/database-postgres'
+import { getDoacoes } from '@/lib/database-postgres'
 
 export async function GET() {
   try {

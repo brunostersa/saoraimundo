@@ -19,7 +19,7 @@ export async function GET(
     console.log('🔍 Buscando doação com ID:', doacaoId)
     
     const doacoes = await getDoacoes()
-    const doacao = doacoes.find((d: any) => d.id === doacaoId)
+    const doacao = doacoes.find((d) => d.id === doacaoId)
     
     if (!doacao) {
       return NextResponse.json({
