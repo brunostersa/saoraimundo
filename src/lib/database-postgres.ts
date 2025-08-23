@@ -392,31 +392,31 @@ export class PostgreSQLDatabase {
 
   private async calcularTotais(client: PoolClient): Promise<Totais> {
     try {
-      // Total geral (soma de todas as doações)
-      const doacoesResult = await client.query(`
-        SELECT COALESCE(SUM(valor), 0) as total
-        FROM "Doacao"
+      // Total geral (soma de todos os valores atuais das atualizações diárias)
+      const atualizacoesResult = await client.query(`
+        SELECT COALESCE(SUM("valorAtual"), 0) as total
+        FROM "AtualizacaoDiaria"
       `)
       
-      const totalGeral = parseFloat(doacoesResult.rows[0].total)
-      console.log('💰 Total geral calculado:', totalGeral)
+      const totalGeral = parseFloat(atualizacoesResult.rows[0].total)
+      console.log('💰 Total geral calculado (atualizações diárias):', totalGeral)
       
-      // Total de hoje
+      // Total de hoje (valor atual da atualização de hoje)
       const hoje = new Date().toISOString().split('T')[0]
       const hojeResult = await client.query(`
-        SELECT COALESCE(SUM(valor), 0) as total
-        FROM "Doacao"
+        SELECT COALESCE("valorAtual", 0) as total
+        FROM "AtualizacaoDiaria"
         WHERE data = $1
       `, [hoje])
       
       const totalHoje = parseFloat(hojeResult.rows[0].total)
-      console.log('🗓️ Total de hoje calculado:', totalHoje, 'Data:', hoje)
+      console.log('🗓️ Total de hoje calculado (atualização diária):', totalHoje, 'Data:', hoje)
       
       // Status de hoje
       const statusHoje: 'sem_registro' | 'com_registro' = totalHoje > 0 ? 'com_registro' : 'sem_registro'
       
       const resultado = { totalGeral, totalHoje, statusHoje }
-      console.log('📊 Totais finais:', resultado)
+      console.log('📊 Totais finais (baseado em atualizações diárias):', resultado)
       
       return resultado
     } catch (error) {
