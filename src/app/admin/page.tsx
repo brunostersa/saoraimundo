@@ -46,7 +46,7 @@ export default function AdminPage() {
     data: new Date().toISOString().split('T')[0],
     valor: ''
   })
-  const [formAction, setFormAction] = useState<'criar' | 'atualizar' | 'fechar'>('criar')
+  const [formAction, setFormAction] = useState<'criar' | 'atualizar'>('criar')
 
   const fetchData = async () => {
     try {
@@ -103,7 +103,6 @@ export default function AdminPage() {
           data: formData.data,
           valorInicial: formAction === 'criar' ? parseFloat(formData.valor) : undefined,
           novoValor: formAction === 'atualizar' ? parseFloat(formData.valor) : undefined,
-          valorFinal: formAction === 'fechar' ? parseFloat(formData.valor) : undefined,
           observacao: 'Atualização manual'
         })
       })
@@ -324,16 +323,6 @@ export default function AdminPage() {
           
           <button
             onClick={() => {
-              setFormAction('fechar')
-              setShowForm(true)
-            }}
-            className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition-colors"
-          >
-            🔒 Fechar Dia
-          </button>
-          
-          <button
-            onClick={() => {
               if (confirm('⚠️ ATENÇÃO: Esta ação irá limpar TODOS os dados do sistema!\n\nDeseja realmente continuar?')) {
                 handleClearData()
               }
@@ -351,7 +340,6 @@ export default function AdminPage() {
             <h3 className="text-xl font-bold mb-4">
               {formAction === 'criar' && 'Iniciar Novo Dia'}
               {formAction === 'atualizar' && 'Atualizar Valor do Dia'}
-              {formAction === 'fechar' && 'Fechar Dia'}
             </h3>
             
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -401,7 +389,6 @@ export default function AdminPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   {formAction === 'criar' && 'Valor Inicial'}
                   {formAction === 'atualizar' && 'Novo Valor'}
-                  {formAction === 'fechar' && 'Valor Final'}
                 </label>
                 <div className="flex gap-2 mb-2">
                   <button

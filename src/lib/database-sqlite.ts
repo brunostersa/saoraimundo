@@ -206,33 +206,7 @@ class SQLiteDatabase {
     }
   }
 
-  fecharDia(data: string, valorFinal?: number, observacao?: string): AtualizacaoDiaria | null {
-    try {
-      const atual = this.getAtualizacaoDoDia(data)
-      if (!atual) return null
-      
-      const observacoes = [...atual.observacoes]
-      if (observacao) {
-        observacoes.push(observacao)
-      }
-      
-      const stmt = this.db.prepare(`
-        UPDATE AtualizacaoDiaria 
-        SET valorAtual = ?, observacoes = ?, status = 'fechado', updatedAt = CURRENT_TIMESTAMP 
-        WHERE data = ?
-      `)
-      const valorFinalAtual = valorFinal || atual.valorAtual
-      const result = stmt.run(valorFinalAtual, JSON.stringify(observacoes), data)
-      
-      if (result.changes > 0) {
-        return this.getAtualizacaoDoDia(data)
-      }
-      return null
-    } catch (error) {
-      console.error('Erro ao fechar dia:', error)
-      return null
-    }
-  }
+
 
   // Função para calcular totais
   getTotais(): Totais {
@@ -298,6 +272,5 @@ export const getAtualizacoesDiarias = () => getDatabase().getAtualizacoesDiarias
 export const getAtualizacaoDoDia = (data: string) => getDatabase().getAtualizacaoDoDia(data)
 export const criarAtualizacaoDiaria = (data: { data: string; valorInicial: number; observacao?: string }) => getDatabase().criarAtualizacaoDiaria(data)
 export const atualizarValorDoDia = (data: string, novoValor: number, observacao: string) => getDatabase().atualizarValorDoDia(data, novoValor, observacao)
-export const fecharDia = (data: string, valorFinal?: number, observacao?: string) => getDatabase().fecharDia(data, valorFinal, observacao)
 export const getTotais = () => getDatabase().getTotais()
 export const clearData = () => getDatabase().clearData()
