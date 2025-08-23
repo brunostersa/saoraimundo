@@ -5,7 +5,17 @@ import { getDatabaseType } from './database-config'
 import * as SQLiteDB from './database-sqlite'
 import * as PostgresDB from './database-postgres'
 
-// Re-exportar todas as interfaces
+// Importar tipos
+import type {
+  Doacao,
+  AtualizacaoDiaria,
+  Totais,
+  CriarDoacaoData,
+  CriarAtualizacaoData,
+  AtualizarValorData
+} from './types'
+
+// Re-exportar tipos
 export type {
   Doacao,
   AtualizacaoDiaria,
@@ -13,7 +23,7 @@ export type {
   CriarDoacaoData,
   CriarAtualizacaoData,
   AtualizarValorData
-} from './database-postgres'
+}
 
 // Função para obter o banco ativo
 function getActiveDatabase() {
@@ -34,12 +44,27 @@ export async function getDoacoes() {
 
 export async function createDoacao(data: CriarDoacaoData) {
   const db = getActiveDatabase()
-  return await db.createDoacao(data)
+  const type = getDatabaseType()
+  
+  if (type === 'postgres') {
+    return await (db as any).createDoacao(data)
+  } else {
+    // SQLite espera (valor, observacao)
+    return await (db as any).createDoacao(data.valor, data.observacao)
+  }
 }
 
 export async function deleteDoacao(id: number) {
   const db = getActiveDatabase()
-  return await db.deleteDoacao(id)
+  const type = getDatabaseType()
+  
+  if (type === 'postgres') {
+    return await (db as any).deleteDoacao(id)
+  } else {
+    // SQLite não tem deleteDoacao, retornar false
+    console.warn('❌ deleteDoacao não implementado no SQLite')
+    return false
+  }
 }
 
 export async function getAtualizacoesDiarias() {
@@ -54,12 +79,26 @@ export async function getAtualizacaoDoDia(data: string) {
 
 export async function criarAtualizacaoDiaria(data: CriarAtualizacaoData) {
   const db = getActiveDatabase()
-  return await db.criarAtualizacaoDiaria(data)
+  const type = getDatabaseType()
+  
+  if (type === 'postgres') {
+    return await (db as any).criarAtualizacaoDiaria(data)
+  } else {
+    // SQLite espera (data, valorInicial, observacao)
+    return await (db as any).criarAtualizacaoDiaria(data.data, data.valorInicial, data.observacao)
+  }
 }
 
 export async function atualizarValorDoDia(data: AtualizarValorData) {
   const db = getActiveDatabase()
-  return await db.atualizarValorDoDia(data)
+  const type = getDatabaseType()
+  
+  if (type === 'postgres') {
+    return await (db as any).atualizarValorDoDia(data)
+  } else {
+    // SQLite espera (data, novoValor, observacao)
+    return await (db as any).atualizarValorDoDia(data.data, data.novoValor, data.observacao)
+  }
 }
 
 export async function getTotais() {
@@ -74,7 +113,19 @@ export async function clearData() {
 
 export async function getDatabaseStats() {
   const db = getActiveDatabase()
-  return await db.getDatabaseStats()
+  const type = getDatabaseType()
+  
+  if (type === 'postgres') {
+    return await (db as any).getDatabaseStats()
+  } else {
+    // SQLite não tem getDatabaseStats, retornar dados básicos
+    const doacoes = await db.getDoacoes()
+    const atualizacoes = await db.getAtualizacoesDiarias()
+    return {
+      doacoes: doacoes.length,
+      atualizacoes: Array.isArray(atualizacoes) ? atualizacoes.length : 0
+    }
+  }
 }
 
 // Função para obter informações do banco ativo

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDoacoes, getAtualizacoesDiarias, getTotais } from '@/lib/database'
-import type { AtualizacaoDiaria } from '@/lib/database-sqlite'
+
 
 export async function GET() {
   try {
@@ -14,13 +14,13 @@ export async function GET() {
     const resultadoAtualizacoes = await getAtualizacoesDiarias()
     
     // Lidar com diferentes tipos de retorno (SQLite vs PostgreSQL)
-    let atualizacoes: AtualizacaoDiaria[] = []
+    let atualizacoes: any[] = []
     if (Array.isArray(resultadoAtualizacoes)) {
       // SQLite retorna array direto
       atualizacoes = resultadoAtualizacoes
     } else if (resultadoAtualizacoes && typeof resultadoAtualizacoes === 'object' && 'atualizacoes' in resultadoAtualizacoes) {
       // PostgreSQL retorna objeto com atualizacoes e totais
-      atualizacoes = (resultadoAtualizacoes as { atualizacoes: AtualizacaoDiaria[] }).atualizacoes || []
+      atualizacoes = resultadoAtualizacoes.atualizacoes || []
     }
     
     console.log('✅ Atualizações:', atualizacoes.length)

@@ -161,7 +161,7 @@ export class PostgreSQLDatabase {
         WHERE id = $1
       `, [id])
       
-      return result.rowCount > 0
+      return result.rowCount ? result.rowCount > 0 : false
     } finally {
       client.release()
     }
@@ -272,7 +272,7 @@ export class PostgreSQLDatabase {
         WHERE data = $3
       `, [data.novoValor, observacoes, data.data])
       
-      return result.rowCount > 0
+      return result.rowCount ? result.rowCount > 0 : false
     } finally {
       client.release()
     }

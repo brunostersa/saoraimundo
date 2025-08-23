@@ -6,7 +6,7 @@ import {
   atualizarValorDoDia, 
   getTotais 
 } from '@/lib/database'
-import type { AtualizacaoDiaria } from '@/lib/database-sqlite'
+
 
 export async function GET(request: NextRequest) {
   try {
@@ -37,13 +37,13 @@ export async function GET(request: NextRequest) {
     const resultado = await getAtualizacoesDiarias()
     
     // Lidar com diferentes tipos de retorno (SQLite vs PostgreSQL)
-    let atualizacoes: AtualizacaoDiaria[] = []
+    let atualizacoes: any[] = []
     if (Array.isArray(resultado)) {
       // SQLite retorna array direto
       atualizacoes = resultado
     } else if (resultado && typeof resultado === 'object' && 'atualizacoes' in resultado) {
       // PostgreSQL retorna objeto com atualizacoes e totais
-      atualizacoes = (resultado as { atualizacoes: AtualizacaoDiaria[] }).atualizacoes || []
+      atualizacoes = resultado.atualizacoes || []
     }
     
     // Se não há atualizações, criar uma inicial
@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
           observacao: 'Banco inicializado automaticamente'
         })
         
-        if (atualizacaoInicial) {
+        if (atualizacaoInicial && typeof atualizacaoInicial === 'object' && 'id' in atualizacaoInicial) {
           console.log('✅ Atualização inicial criada:', atualizacaoInicial.id)
           atualizacoes = [atualizacaoInicial]
         }
