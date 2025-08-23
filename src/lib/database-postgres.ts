@@ -113,12 +113,47 @@ export class PostgreSQLDatabase {
     await this.pool.end()
   }
 
+  // Garantir que as tabelas existam
+  private async ensureTablesExist(client: PoolClient): Promise<void> {
+    try {
+      // Criar tabela de doações
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS "Doacao" (
+          id SERIAL PRIMARY KEY,
+          valor DECIMAL(10,2) NOT NULL,
+          observacao TEXT,
+          data DATE NOT NULL DEFAULT CURRENT_DATE,
+          "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        )
+      `)
+
+      // Criar tabela de atualizações diárias
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS "AtualizacaoDiaria" (
+          id SERIAL PRIMARY KEY,
+          data DATE UNIQUE NOT NULL,
+          "valorInicial" DECIMAL(10,2) NOT NULL,
+          "valorAtual" DECIMAL(10,2) NOT NULL,
+          observacoes JSONB NOT NULL DEFAULT '[]',
+          "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+          "updatedAt" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        )
+      `)
+    } catch (error) {
+      console.error('❌ Erro ao criar tabelas:', error)
+      // Não lançar erro para não quebrar a aplicação
+    }
+  }
+
   // ===== DOAÇÕES =====
 
   async getDoacoes(): Promise<Doacao[]> {
     const client = await this.pool.connect()
     
     try {
+      // Verificar se as tabelas existem e criar se necessário
+      await this.ensureTablesExist(client)
+      
       const result = await client.query(`
         SELECT id, valor, observacao, data, "createdAt"
         FROM "Doacao"
@@ -173,6 +208,9 @@ export class PostgreSQLDatabase {
     const client = await this.pool.connect()
     
     try {
+      // Verificar se as tabelas existem e criar se necessário
+      await this.ensureTablesExist(client)
+      
       // Buscar todas as atualizações
       const atualizacoesResult = await client.query(`
         SELECT id, data, "valorInicial", "valorAtual", observacoes, "createdAt", "updatedAt"
