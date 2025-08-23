@@ -33,7 +33,8 @@ export async function GET(request: NextRequest) {
     
     // Buscar todas as atualizações
     console.log('📅 Buscando todas as atualizações diárias')
-    let atualizacoes = await getAtualizacoesDiarias()
+    let resultado = await getAtualizacoesDiarias()
+    let atualizacoes = resultado.atualizacoes || []
     
     // Se não há atualizações, criar uma inicial
     if (atualizacoes.length === 0) {
