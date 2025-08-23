@@ -19,11 +19,14 @@ export default function DoacoesClient() {
       setLoading(true)
       setError(null)
 
-      // Buscar apenas atualizações diárias para os totais
-      const atualizacoesResponse = await fetch('/api/atualizacoes')
-      if (atualizacoesResponse.ok) {
-        const atualizacoesData = await atualizacoesResponse.json()
-        setTotais(atualizacoesData.data.totais)
+      // Buscar totais de doações diretamente
+      const totaisResponse = await fetch('/api/totais')
+      if (totaisResponse.ok) {
+        const totaisData = await totaisResponse.json()
+        console.log('💰 Totais recebidos:', totaisData.data)
+        setTotais(totaisData.data)
+      } else {
+        throw new Error('Erro ao buscar totais')
       }
     } catch (err) {
       console.error('Erro ao buscar dados:', err)
