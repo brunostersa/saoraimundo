@@ -37,38 +37,53 @@ export async function POST(request: NextRequest) {
     
     console.log('💰 Criando nova doação:', { valor, observacao, data })
     
-    // Tentar inicializar o banco PostgreSQL se necessário
-    const dbType = process.env.DATABASE_TYPE || 'sqlite'
-    if (dbType === 'postgres') {
-      try {
-        const { getDatabase } = await import('@/lib/database-postgres')
-        const db = getDatabase()
-        await db.initialize()
-        console.log('✅ Banco PostgreSQL inicializado para doação')
-      } catch (initError) {
-        console.error('❌ Erro ao inicializar PostgreSQL:', initError)
-      }
+    // Debug: verificar variáveis de ambiente
+    console.log('🔍 DEBUG - Variáveis de ambiente:')
+    console.log('🌍 NODE_ENV:', process.env.NODE_ENV)
+    console.log('🔗 DATABASE_URL:', process.env.DATABASE_URL ? 'Configurado' : 'Não configurado')
+    console.log('🏷️ DATABASE_TYPE:', process.env.DATABASE_TYPE || 'Não definido')
+    
+    try {
+      // Tentar inicializar o banco PostgreSQL
+      const { getDatabase } = await import('@/lib/database-postgres')
+      const db = getDatabase()
+      
+      console.log('✅ Banco PostgreSQL importado com sucesso')
+      
+      // Inicializar banco
+      await db.initialize()
+      console.log('✅ Banco PostgreSQL inicializado')
+      
+      // Criar doação
+      const doacaoId = await db.createDoacao({
+        valor,
+        observacao,
+        data
+      })
+      
+      console.log('✅ Doação criada com sucesso:', doacaoId)
+      
+      return NextResponse.json({
+        success: true,
+        message: 'Doação criada com sucesso',
+        data: { id: doacaoId }
+      }, { status: 201 })
+      
+    } catch (dbError) {
+      console.error('❌ Erro no banco PostgreSQL:', dbError)
+      return NextResponse.json({
+        success: false,
+        error: 'Erro no banco PostgreSQL',
+        details: dbError instanceof Error ? dbError.message : 'Erro desconhecido'
+      }, { status: 500 })
     }
     
-    const doacaoId = await createDoacao({
-      valor,
-      observacao,
-      data
-    })
-    
-    console.log('✅ Doação criada com sucesso:', doacaoId)
-    
-    return NextResponse.json({
-      success: true,
-      message: 'Doação criada com sucesso',
-      data: { id: doacaoId }
-    }, { status: 201 })
-    
   } catch (error) {
-    console.error('❌ Erro ao criar doação:', error)
+    console.error('❌ Erro geral ao criar doação:', error)
     return NextResponse.json({
       success: false,
-      error: 'Erro ao criar doação'
+      error: 'Erro geral ao criar doação',
+      details: error instanceof Error ? error.message : 'Erro desconhecido'
     }, { status: 500 })
   }
 }
