@@ -20,14 +20,19 @@ export const DATABASE_CONFIG = {
 
 // Função para determinar qual banco usar
 export function getDatabaseType(): 'sqlite' | 'postgres' {
-  // Se estamos em produção e temos DATABASE_URL, usar PostgreSQL
-  if (process.env.NODE_ENV === 'production' && process.env.DATABASE_URL) {
+  // Se temos DATABASE_URL que parece ser PostgreSQL, usar PostgreSQL
+  if (process.env.DATABASE_URL && process.env.DATABASE_URL.includes('postgresql://')) {
     return 'postgres'
   }
   
   // Se temos DATABASE_TYPE definido, usar o especificado
   if (process.env.DATABASE_TYPE) {
     return process.env.DATABASE_TYPE as 'sqlite' | 'postgres'
+  }
+  
+  // Se estamos em produção e temos qualquer DATABASE_URL, usar PostgreSQL
+  if (process.env.NODE_ENV === 'production' && process.env.DATABASE_URL) {
+    return 'postgres'
   }
   
   // Padrão: SQLite para desenvolvimento
