@@ -1,0 +1,67 @@
+#!/bin/bash
+
+echo "🚀 CONFIGURAÇÃO DO AMBIENTE DE PRODUÇÃO - Igreja São Raimundo"
+echo "================================================================"
+echo ""
+
+echo "📋 PASSO A PASSO PARA CONFIGURAR O BANCO ONLINE:"
+echo ""
+
+echo "1️⃣ CRIAR PROJETO NO SUPABASE:"
+echo "   • Acesse: https://supabase.com"
+echo "   • Login com GitHub"
+echo "   • New Project: sao-raimundo-doacoes"
+echo "   • Escolha região próxima (São Paulo)"
+echo "   • Aguarde criação (pode demorar alguns minutos)"
+echo ""
+
+echo "2️⃣ OBTER CONNECTION STRING:"
+echo "   • No projeto → Settings → Database"
+echo "   • Role: postgres"
+echo "   • Copie a connection string"
+echo ""
+
+echo "3️⃣ CONFIGURAR NO VERCEL:"
+echo "   • Acesse: https://vercel.com"
+echo "   • Seu projeto → Settings → Environment Variables"
+echo "   • Adicione:"
+echo "     DATABASE_TYPE = postgres"
+echo "     DATABASE_URL = [SUA_CONNECTION_STRING]"
+echo "     NODE_ENV = production"
+echo ""
+
+echo "4️⃣ FAZER DEPLOY:"
+echo "   • Commit e push das mudanças"
+echo "   • O Vercel fará deploy automático"
+echo ""
+
+echo "5️⃣ VERIFICAR FUNCIONAMENTO:"
+echo "   • Acesse sua URL do Vercel"
+echo "   • Teste criar uma doação"
+echo "   • Verifique se persiste no banco"
+echo ""
+
+echo "🎯 CONFIGURAÇÃO ATUAL:"
+echo "   • Local: SQLite (database.db)"
+echo "   • Produção: PostgreSQL (Supabase)"
+echo "   • Alternância automática baseada em NODE_ENV"
+echo ""
+
+echo "✅ APÓS CONFIGURAR, O SISTEMA FUNCIONARÁ:"
+echo "   • Localmente com SQLite"
+echo "   • Online com PostgreSQL"
+echo "   • Dados persistentes e confiáveis"
+echo ""
+
+echo "🔧 ARQUIVOS IMPORTANTES:"
+echo "   • src/lib/database-config.ts - Configuração do banco"
+echo "   • src/lib/database-postgres.ts - Conexão PostgreSQL"
+echo "   • src/lib/database-sqlite.ts - Conexão SQLite"
+echo "   • vercel.json - Configuração do Vercel"
+echo ""
+
+echo "📞 PRECISA DE AJUDA?"
+echo "   • Verifique os logs do Vercel"
+echo "   • Teste a conexão localmente primeiro"
+echo "   • Use o endpoint /api/test-connection para testar"
+echo ""
