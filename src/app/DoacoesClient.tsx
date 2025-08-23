@@ -121,28 +121,28 @@ export default function DoacoesClient() {
   return (
     <div className="space-y-8">
       {/* Cards de Totais */}
-      <div className="space-y-8">
-        <div className="bg-white rounded-lg shadow-lg p-12 border border-gray-200">
+      <div className="space-y-6">
+        <div className="bg-white rounded-lg shadow-lg p-8 border border-gray-200">
           <div className="flex items-center justify-between">
             <div className="text-7xl mr-10">💰</div>
             <div className="flex-1">
-              <p className="text-xl font-bold text-gray-700 mb-6 leading-[0.8]">Total Geral</p>
-              <p className="text-5xl font-bold text-blue-600 mb-6 leading-[0.7]">{formatarValor(totais.totalGeral)}</p>
-              <p className="text-sm text-gray-500 leading-[1.0]">Soma acumulada de todos os dias</p>
+              <p className="text-xl font-bold text-gray-700 mb-4 leading-[0.9]">Total Geral</p>
+              <p className="text-5xl font-bold text-blue-600 mb-4 leading-[0.8]">{formatarValor(totais.totalGeral)}</p>
+              <p className="text-sm text-gray-500 leading-[1.1]">Soma acumulada de todos os dias</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-lg p-12 border border-gray-200">
+        <div className="bg-white rounded-lg shadow-lg p-8 border border-gray-200">
           <div className="flex items-center justify-between">
             <div className="text-7xl mr-10">🗓️</div>
             <div className="flex-1">
-              <p className="text-xl font-bold text-gray-700 mb-6 leading-[0.8]">Total Hoje</p>
-              <p className="text-5xl font-bold text-green-600 mb-6 leading-[0.7]">{formatarValor(totais.totalHoje)}</p>
-              <p className={`text-lg px-6 py-4 rounded-full inline-block mb-6 leading-[0.9] ${getStatusColor(totais.statusHoje)}`}>
+              <p className="text-xl font-bold text-gray-700 mb-4 leading-[0.9]">Total Hoje</p>
+              <p className="text-5xl font-bold text-green-600 mb-4 leading-[0.8]">{formatarValor(totais.totalHoje)}</p>
+              <p className={`text-lg px-6 py-3 rounded-full inline-block mb-4 leading-[1.0] ${getStatusColor(totais.statusHoje)}`}>
                 {getStatusText(totais.statusHoje)}
               </p>
-              <p className="text-sm text-gray-500 leading-[1.0]">Valor atual do dia</p>
+              <p className="text-sm text-gray-500 leading-[1.1]">Valor atual do dia</p>
             </div>
           </div>
         </div>
