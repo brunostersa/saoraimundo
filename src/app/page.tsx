@@ -61,15 +61,20 @@ export default function Home() {
           <div className="relative z-10 h-full flex flex-col justify-center items-center text-center p-8">
             {/* Header Principal com Logo */}
             <div className="mb-12 w-full max-w-4xl">
-              <div className="mb-8">
-                <Image
-                  src="/logo.png"
-                  alt="Logo Igreja São Raimundo"
-                  width={200}
-                  height={100}
-                  className="mx-auto w-32 h-16 sm:w-40 sm:h-20 md:w-48 md:h-24 lg:w-56 lg:h-28 object-contain drop-shadow-2xl"
-                  priority
-                />
+              <div className="mb-8 flex justify-center">
+                <div className="relative">
+                  {/* Círculo branco de fundo */}
+                  <div className="absolute inset-0 bg-white rounded-full shadow-2xl transform scale-110"></div>
+                  {/* Logo sobreposto */}
+                  <Image
+                    src="/logo.png"
+                    alt="Logo Igreja São Raimundo"
+                    width={200}
+                    height={100}
+                    className="relative z-10 mx-auto w-32 h-16 sm:w-40 sm:h-20 md:w-48 md:h-24 lg:w-56 lg:h-28 object-contain drop-shadow-2xl"
+                    priority
+                  />
+                </div>
               </div>
               
               {/* Títulos principais */}
@@ -187,15 +192,20 @@ export default function Home() {
         <div className="relative z-10 h-full flex flex-col justify-center items-center text-center p-8">
           {/* Header Principal com Logo */}
           <div className="mb-12 w-full max-w-4xl">
-            <div className="mb-8">
-              <Image
-                src="/logo.png"
-                alt="Logo Igreja São Raimundo"
-                width={200}
-                height={100}
-                className="mx-auto w-32 h-16 sm:w-40 sm:h-20 md:w-48 md:h-24 lg:w-56 lg:h-28 object-contain drop-shadow-2xl"
-                priority
-              />
+            <div className="mb-8 flex justify-center">
+              <div className="relative">
+                {/* Círculo branco de fundo */}
+                <div className="absolute inset-0 bg-white rounded-full shadow-2xl transform scale-110"></div>
+                {/* Logo sobreposto */}
+                <Image
+                  src="/logo.png"
+                  alt="Logo Igreja São Raimundo"
+                  width={200}
+                  height={100}
+                  className="relative z-10 mx-auto w-32 h-16 sm:w-40 sm:h-20 md:w-48 md:h-24 lg:w-56 lg:h-28 object-contain drop-shadow-2xl"
+                  priority
+                />
+              </div>
             </div>
             
             {/* Títulos principais */}
