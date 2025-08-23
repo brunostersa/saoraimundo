@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getDoacoes, getAtualizacoesDiarias, getTotais } from '@/lib/database-sqlite'
+import { getDoacoes, getAtualizacoesDiarias, getTotais } from '@/lib/database'
 
 export async function GET() {
   try {

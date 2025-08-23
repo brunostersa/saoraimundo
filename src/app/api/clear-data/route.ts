@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { clearData } from '@/lib/database-sqlite'
+import { clearData } from '@/lib/database'
 
 export async function POST() {
   try {

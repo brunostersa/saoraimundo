@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getDoacoes } from '@/lib/database-sqlite'
+import { getDoacoes, deleteDoacao } from '@/lib/database'
 
 export async function GET(
   request: NextRequest,
@@ -18,8 +18,8 @@ export async function GET(
     
     console.log('🔍 Buscando doação com ID:', doacaoId)
     
-    const doacoes = getDoacoes()
-    const doacao = doacoes.find(d => d.id === doacaoId)
+    const doacoes = await getDoacoes()
+    const doacao = doacoes.find((d: any) => d.id === doacaoId)
     
     if (!doacao) {
       return NextResponse.json({
@@ -59,7 +59,15 @@ export async function DELETE(
     
     console.log('🗑️ Deletando doação com ID:', doacaoId)
     
-    // Por enquanto, retornar sucesso (implementação futura)
+    const success = await deleteDoacao(doacaoId)
+    
+    if (!success) {
+      return NextResponse.json({
+        success: false,
+        error: 'Doação não encontrada ou erro ao deletar'
+      }, { status: 404 })
+    }
+    
     return NextResponse.json({
       success: true,
       message: 'Doação deletada com sucesso'

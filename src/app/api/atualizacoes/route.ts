@@ -4,9 +4,8 @@ import {
   getAtualizacaoDoDia, 
   criarAtualizacaoDiaria, 
   atualizarValorDoDia, 
-  fecharDia,
   getTotais 
-} from '@/lib/database-sqlite'
+} from '@/lib/database'
 
 export async function GET(request: NextRequest) {
   try {
@@ -116,11 +115,11 @@ export async function POST(request: NextRequest) {
           }, { status: 400 })
         }
         
-        const atualizacao = await atualizarValorDoDia(
-          data.data,
-          data.novoValor,
-          data.observacao
-        )
+        const atualizacao = await atualizarValorDoDia({
+          data: data.data,
+          novoValor: data.novoValor,
+          observacao: data.observacao
+        })
         
         return NextResponse.json({
           success: true,
@@ -128,27 +127,7 @@ export async function POST(request: NextRequest) {
           data: atualizacao
         })
         
-      case 'fechar':
-        // Fechar dia
-        if (!data.data || data.valorFinal === undefined) {
-          return NextResponse.json({
-            success: false,
-            error: 'Data e valor final são obrigatórios'
-          }, { status: 400 })
-        }
-        
-        const diaFechado = await fecharDia(
-          data.data,
-          data.valorFinal,
-          data.observacao
-        )
-        
-        return NextResponse.json({
-          success: true,
-          message: 'Dia fechado com sucesso',
-          data: diaFechado
-        })
-        
+
       case 'totais':
         // Obter totais
         const totais = await getTotais()
@@ -161,7 +140,7 @@ export async function POST(request: NextRequest) {
       default:
         return NextResponse.json({
           success: false,
-          error: 'Ação não reconhecida. Use: criar, atualizar, fechar, ou totais'
+          error: 'Ação não reconhecida. Use: criar, atualizar, ou totais'
         }, { status: 400 })
     }
     
