@@ -175,6 +175,9 @@ export class PostgreSQLDatabase {
     const client = await this.pool.connect()
     
     try {
+      // Verificar se as tabelas existem
+      await this.ensureTablesExist(client)
+      
       const result = await client.query(`
         INSERT INTO "Doacao" (valor, observacao, data)
         VALUES ($1, $2, $3)
@@ -191,6 +194,9 @@ export class PostgreSQLDatabase {
     const client = await this.pool.connect()
     
     try {
+      // Verificar se as tabelas existem
+      await this.ensureTablesExist(client)
+      
       const result = await client.query(`
         DELETE FROM "Doacao"
         WHERE id = $1
@@ -241,6 +247,9 @@ export class PostgreSQLDatabase {
     const client = await this.pool.connect()
     
     try {
+      // Verificar se as tabelas existem
+      await this.ensureTablesExist(client)
+      
       const result = await client.query(`
         SELECT id, data, "valorInicial", "valorAtual", observacoes, "createdAt", "updatedAt"
         FROM "AtualizacaoDiaria"
@@ -268,11 +277,21 @@ export class PostgreSQLDatabase {
     const client = await this.pool.connect()
     
     try {
+      // Verificar se as tabelas existem
+      await this.ensureTablesExist(client)
+      
       const observacoes = [data.observacao || 'Inicialização do dia']
       
+      // Usar ON CONFLICT para evitar duplicatas
       const result = await client.query(`
         INSERT INTO "AtualizacaoDiaria" (data, "valorInicial", "valorAtual", observacoes)
         VALUES ($1, $2, $3, $4)
+        ON CONFLICT (data) 
+        DO UPDATE SET 
+          "valorInicial" = EXCLUDED."valorInicial",
+          "valorAtual" = EXCLUDED."valorAtual",
+          observacoes = EXCLUDED.observacoes,
+          "updatedAt" = CURRENT_TIMESTAMP
         RETURNING id
       `, [data.data, data.valorInicial, data.valorInicial, JSON.stringify(observacoes)])
       
@@ -286,6 +305,9 @@ export class PostgreSQLDatabase {
     const client = await this.pool.connect()
     
     try {
+      // Verificar se as tabelas existem
+      await this.ensureTablesExist(client)
+      
       // Buscar atualização existente
       const atualizacao = await this.getAtualizacaoDoDia(data.data)
       
@@ -296,10 +318,29 @@ export class PostgreSQLDatabase {
           valorInicial: 0,
           observacao: data.observacao || 'Criação automática'
         })
+        
+        // Buscar novamente após criar
+        const novaAtualizacao = await this.getAtualizacaoDoDia(data.data)
+        if (novaAtualizacao) {
+          // Atualizar valor e adicionar observação
+          const observacoes = novaAtualizacao.observacoes || []
+          if (data.observacao) {
+            observacoes.push(data.observacao)
+          }
+          
+          const result = await client.query(`
+            UPDATE "AtualizacaoDiaria"
+            SET "valorAtual" = $1, observacoes = $2, "updatedAt" = CURRENT_TIMESTAMP
+            WHERE data = $3
+          `, [data.novoValor, JSON.stringify(observacoes), data.data])
+          
+          return result.rowCount ? result.rowCount > 0 : false
+        }
+        return false
       }
       
       // Atualizar valor e adicionar observação
-      const observacoes = atualizacao?.observacoes || []
+      const observacoes = atualizacao.observacoes || []
       if (data.observacao) {
         observacoes.push(data.observacao)
       }
@@ -322,6 +363,9 @@ export class PostgreSQLDatabase {
     const client = await this.pool.connect()
     
     try {
+      // Verificar se as tabelas existem
+      await this.ensureTablesExist(client)
+      
       return await this.calcularTotais(client)
     } finally {
       client.release()
@@ -329,6 +373,9 @@ export class PostgreSQLDatabase {
   }
 
   private async calcularTotais(client: PoolClient): Promise<Totais> {
+    // Verificar se as tabelas existem
+    await this.ensureTablesExist(client)
+    
     // Total geral (soma de todas as doações)
     const doacoesResult = await client.query(`
       SELECT COALESCE(SUM(valor), 0) as total
@@ -359,6 +406,9 @@ export class PostgreSQLDatabase {
     const client = await this.pool.connect()
     
     try {
+      // Verificar se as tabelas existem
+      await this.ensureTablesExist(client)
+      
       await client.query('DELETE FROM "Doacao"')
       await client.query('DELETE FROM "AtualizacaoDiaria"')
       console.log('✅ Todos os dados foram limpos')
@@ -371,6 +421,9 @@ export class PostgreSQLDatabase {
     const client = await this.pool.connect()
     
     try {
+      // Verificar se as tabelas existem
+      await this.ensureTablesExist(client)
+      
       const doacoesResult = await client.query('SELECT COUNT(*) as count FROM "Doacao"')
       const atualizacoesResult = await client.query('SELECT COUNT(*) as count FROM "AtualizacaoDiaria"')
       
