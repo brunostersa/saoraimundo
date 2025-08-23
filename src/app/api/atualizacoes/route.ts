@@ -6,7 +6,7 @@ import {
   atualizarValorDoDia, 
   fecharDia,
   getTotais 
-} from '@/lib/database'
+} from '@/lib/database-sqlite'
 
 export async function GET(request: NextRequest) {
   try {

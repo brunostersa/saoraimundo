@@ -1,23 +1,30 @@
 import { NextResponse } from 'next/server'
-import { exportData } from '@/lib/database'
+import { getDoacoes, getAtualizacoesDiarias } from '@/lib/database-sqlite'
 
 export async function GET() {
   try {
-    console.log('📤 Solicitando exportação de dados...')
-    const data = await exportData()
+    console.log('📤 Exportando dados...')
     
-    console.log('✅ Dados exportados com sucesso')
+    const doacoes = await getDoacoes()
+    const atualizacoes = await getAtualizacoesDiarias()
+    
+    const exportData = {
+      doacoes,
+      atualizacoes,
+      exportDate: new Date().toISOString(),
+      version: '1.0'
+    }
+    
     return NextResponse.json({
       success: true,
-      data,
-      timestamp: new Date().toISOString()
+      data: exportData
     })
+    
   } catch (error) {
     console.error('❌ Erro ao exportar dados:', error)
     return NextResponse.json({
       success: false,
-      error: 'Erro ao exportar dados do sistema',
-      details: error instanceof Error ? error.message : 'Erro desconhecido'
+      error: error instanceof Error ? error.message : 'Erro desconhecido'
     }, { status: 500 })
   }
 }

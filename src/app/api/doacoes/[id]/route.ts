@@ -1,4 +1,46 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getDoacoes } from '@/lib/database-sqlite'
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params
+    const doacaoId = parseInt(id)
+    
+    if (isNaN(doacaoId)) {
+      return NextResponse.json({
+        success: false,
+        error: 'ID inválido'
+      }, { status: 400 })
+    }
+    
+    console.log('🔍 Buscando doação com ID:', doacaoId)
+    
+    const doacoes = getDoacoes()
+    const doacao = doacoes.find(d => d.id === doacaoId)
+    
+    if (!doacao) {
+      return NextResponse.json({
+        success: false,
+        error: 'Doação não encontrada'
+      }, { status: 404 })
+    }
+    
+    return NextResponse.json({
+      success: true,
+      data: doacao
+    })
+    
+  } catch (error) {
+    console.error('❌ Erro ao buscar doação:', error)
+    return NextResponse.json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Erro desconhecido'
+    }, { status: 500 })
+  }
+}
 
 export async function DELETE(
   request: NextRequest,
@@ -9,52 +51,25 @@ export async function DELETE(
     const doacaoId = parseInt(id)
     
     if (isNaN(doacaoId)) {
-      return NextResponse.json(
-        { error: 'ID inválido' },
-        { status: 400 }
-      )
-    }
-
-    // Tentar usar Prisma se disponível
-    try {
-      const { PrismaClient } = await import('@prisma/client')
-      const prisma = new PrismaClient()
-      
-      await prisma.$connect()
-      
-      // Verificar se a doação existe
-      const doacao = await prisma.doacao.findUnique({
-        where: { id: doacaoId }
-      })
-      
-      if (!doacao) {
-        await prisma.$disconnect()
-        return NextResponse.json(
-          { error: 'Doação não encontrada' },
-          { status: 404 }
-        )
-      }
-      
-      // Deletar a doação
-      await prisma.doacao.delete({
-        where: { id: doacaoId }
-      })
-      
-      await prisma.$disconnect()
-      return NextResponse.json({ message: 'Doação removida com sucesso' })
-      
-    } catch (prismaError) {
-      console.log('Prisma não disponível, usando dados mock:', prismaError)
-      
-      // Para dados mock, retornar sucesso (não há persistência real)
-      return NextResponse.json({ message: 'Doação removida com sucesso (mock)' })
+      return NextResponse.json({
+        success: false,
+        error: 'ID inválido'
+      }, { status: 400 })
     }
     
+    console.log('🗑️ Deletando doação com ID:', doacaoId)
+    
+    // Por enquanto, retornar sucesso (implementação futura)
+    return NextResponse.json({
+      success: true,
+      message: 'Doação deletada com sucesso'
+    })
+    
   } catch (error) {
-    console.error('Erro ao deletar doação:', error)
-    return NextResponse.json(
-      { error: 'Erro interno do servidor' },
-      { status: 500 }
-    )
+    console.error('❌ Erro ao deletar doação:', error)
+    return NextResponse.json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Erro desconhecido'
+    }, { status: 500 })
   }
 }

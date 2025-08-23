@@ -6,8 +6,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./database.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Doacao {
@@ -17,15 +17,4 @@ model Doacao {
   observacao String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-}
-
-model AtualizacaoDiaria {
-  id            Int      @id @default(autoincrement())
-  data          String   @unique // YYYY-MM-DD format
-  valorInicial  Float
-  valorAtual    Float
-  observacoes   String   // JSON string of observations
-  status        String   @default("aberto") // "aberto" | "fechado"
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
 }

@@ -4,20 +4,20 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "db:studio": "prisma studio",
-    "db:push": "prisma db push",
-    "db:generate": "prisma generate",
-    "db:reset": "prisma db push --force-reset"
+    "db:studio": "echo 'SQLite nativo - use ferramentas como DB Browser for SQLite'",
+    "db:push": "echo 'SQLite nativo - banco criado automaticamente'",
+    "db:generate": "echo 'SQLite nativo - sem geração necessária'",
+    "db:reset": "echo 'SQLite nativo - use API /api/clear-data'"
   },
   "dependencies": {
-    "@prisma/client": "^6.14.0",
+    "better-sqlite3": "^9.4.3",
+    "@types/better-sqlite3": "^7.6.9",
     "date-fns": "^4.1.0",
     "next": "15.4.6",
     "pg": "^8.16.3",
-    "prisma": "^6.14.0",
     "qrcode": "^1.5.3",
     "react": "^19",
     "react-dom": "^19",
