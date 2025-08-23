@@ -443,6 +443,20 @@ export class PostgreSQLDatabase {
     }
   }
 
+  async clearDoacoes(): Promise<void> {
+    const client = await this.pool.connect()
+    
+    try {
+      // Verificar se as tabelas existem
+      await this.ensureTablesExist(client)
+      
+      await client.query('DELETE FROM "Doacao"')
+      console.log('✅ Doações individuais foram limpas')
+    } finally {
+      client.release()
+    }
+  }
+
   async getDatabaseStats(): Promise<{ doacoes: number, atualizacoes: number }> {
     const client = await this.pool.connect()
     
@@ -517,6 +531,11 @@ export async function getTotais(): Promise<Totais> {
 export async function clearData(): Promise<void> {
   const db = getDatabase()
   return await db.clearData()
+}
+
+export async function clearDoacoes(): Promise<void> {
+  const db = getDatabase()
+  return await db.clearDoacoes()
 }
 
 export async function getDatabaseStats(): Promise<{ doacoes: number, atualizacoes: number }> {

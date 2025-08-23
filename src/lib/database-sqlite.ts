@@ -249,6 +249,17 @@ class SQLiteDatabase {
     }
   }
 
+  // Função para limpar apenas doações individuais
+  clearDoacoes(): void {
+    try {
+      this.db.exec('DELETE FROM Doacao;')
+      console.log('✅ Doações individuais foram limpas')
+    } catch (error) {
+      console.error('❌ Erro ao limpar doações:', error)
+      throw error
+    }
+  }
+
   // Fechar conexão
   close(): void {
     this.db.close()
@@ -274,3 +285,4 @@ export const criarAtualizacaoDiaria = (data: { data: string; valorInicial: numbe
 export const atualizarValorDoDia = (data: string, novoValor: number, observacao: string) => getDatabase().atualizarValorDoDia(data, novoValor, observacao)
 export const getTotais = () => getDatabase().getTotais()
 export const clearData = () => getDatabase().clearData()
+export const clearDoacoes = () => getDatabase().clearDoacoes()

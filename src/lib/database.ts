@@ -111,6 +111,11 @@ export async function clearData() {
   return await db.clearData()
 }
 
+export async function clearDoacoes() {
+  const db = getActiveDatabase()
+  return await db.clearDoacoes()
+}
+
 export async function getDatabaseStats() {
   const db = getActiveDatabase()
   const type = getDatabaseType()
