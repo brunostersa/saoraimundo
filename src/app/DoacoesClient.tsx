@@ -51,13 +51,13 @@ export default function DoacoesClient() {
     
     if (valorInteiro >= 1000000) {
       // Para milhões: 1.500.000 -> 1,50 milhões
-      return <span><span className="text-2xl">R$</span> {(valorInteiro / 1000000).toFixed(2).replace('.', ',')} milhões</span>
+      return <span><span className="text-lg sm:text-2xl">R$</span> {(valorInteiro / 1000000).toFixed(2).replace('.', ',')} milhões</span>
     } else if (valorInteiro >= 1000) {
       // Para milhares: 15.000 -> 15,0 mil
-      return <span><span className="text-2xl">R$</span> {(valorInteiro / 1000).toFixed(1).replace('.', ',')} mil</span>
+      return <span><span className="text-lg sm:text-2xl">R$</span> {(valorInteiro / 1000).toFixed(1).replace('.', ',')} mil</span>
     } else {
       // Para valores menores que 1000, usa formatação simples
-      return <span><span className="text-2xl">R$</span> {valorInteiro.toString()}</span>
+      return <span><span className="text-lg sm:text-2xl">R$</span> {valorInteiro.toString()}</span>
     }
   }
 
@@ -119,30 +119,30 @@ export default function DoacoesClient() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* Cards de Totais */}
-      <div className="space-y-6">
-        <div className="bg-white rounded-lg shadow-lg p-8 border border-gray-200">
-          <div className="flex items-center justify-between">
-            <div className="text-7xl mr-10">💰</div>
-            <div className="flex-1">
-              <p className="text-xl font-bold text-gray-700 mb-4 leading-[0.9]">Total Geral</p>
-              <p className="text-5xl font-bold text-blue-600 mb-4 leading-[0.8]">{formatarValor(totais.totalGeral)}</p>
-              <p className="text-sm text-gray-500 leading-[1.1]">Soma acumulada de todos os dias</p>
+      <div className="space-y-4 sm:space-y-6">
+        <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 lg:p-8 border border-gray-200">
+          <div className="flex flex-col sm:flex-row items-center sm:justify-between gap-4 sm:gap-6">
+            <div className="text-4xl sm:text-5xl lg:text-7xl">💰</div>
+            <div className="flex-1 text-center sm:text-left">
+              <p className="text-lg sm:text-xl font-bold text-gray-700 mb-2 sm:mb-4 leading-[0.9]">Total Geral</p>
+              <p className="text-3xl sm:text-4xl lg:text-5xl font-bold text-blue-600 mb-2 sm:mb-4 leading-[0.8]">{formatarValor(totais.totalGeral)}</p>
+              <p className="text-xs sm:text-sm text-gray-500 leading-[1.1]">Soma acumulada de todos os dias</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-lg p-8 border border-gray-200">
-          <div className="flex items-center justify-between">
-            <div className="text-7xl mr-10">🗓️</div>
-            <div className="flex-1">
-              <p className="text-xl font-bold text-gray-700 mb-4 leading-[0.9]">Total Hoje</p>
-              <p className="text-5xl font-bold text-green-600 mb-4 leading-[0.8]">{formatarValor(totais.totalHoje)}</p>
-              <p className={`text-lg px-6 py-3 rounded-full inline-block mb-4 leading-[1.0] ${getStatusColor(totais.statusHoje)}`}>
+        <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 lg:p-8 border border-gray-200">
+          <div className="flex flex-col sm:flex-row items-center sm:justify-between gap-4 sm:gap-6">
+            <div className="text-4xl sm:text-5xl lg:text-7xl">🗓️</div>
+            <div className="flex-1 text-center sm:text-left">
+              <p className="text-lg sm:text-xl font-bold text-gray-700 mb-2 sm:mb-4 leading-[0.9]">Total Hoje</p>
+              <p className="text-3xl sm:text-4xl lg:text-5xl font-bold text-green-600 mb-2 sm:mb-4 leading-[0.8]">{formatarValor(totais.totalHoje)}</p>
+              <p className={`text-sm sm:text-lg px-4 sm:px-6 py-2 sm:py-3 rounded-full inline-block mb-2 sm:mb-4 leading-[1.0] ${getStatusColor(totais.statusHoje)}`}>
                 {getStatusText(totais.statusHoje)}
               </p>
-              <p className="text-sm text-gray-500 leading-[1.1]">Valor atual do dia</p>
+              <p className="text-xs sm:text-sm text-gray-500 leading-[1.1]">Valor atual do dia</p>
             </div>
           </div>
         </div>
